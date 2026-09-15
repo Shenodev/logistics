@@ -97,8 +97,7 @@ const devHint = isAdminHost ? 'admin@sheno.dev / admin123' : 'user@sheno.dev / u
 const onSubmit = handleSubmit(async ({ email, password }) => {
   try {
     await auth.login({ email, password })
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-    await navigateTo(redirect)
+    await navigateTo(safeRedirectTarget(route.query.redirect))
   }
   catch {
     // error surfaced via auth.loginError
