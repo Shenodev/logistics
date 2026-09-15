@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { activityFeed, recentQueries, type ActivityCategory } from '~~/app/data/shipments'
 
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ layout: 'user', middleware: 'auth' })
 
 useSeoMeta({
   title: 'Dashboard',

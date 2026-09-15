@@ -406,6 +406,47 @@ export function getShipment(id: string): Shipment | undefined {
   return shipments.find((shipment) => shipment.id === normalized)
 }
 
+export interface NewShipmentInput {
+  origin: string
+  destination: string
+  mode: string
+  priority: string
+  grossWeight: string
+}
+
+export function createBookedShipment(input: NewShipmentInput): Shipment {
+  const base = shipments[0]
+  const status: ShipmentStatus = 'booked'
+  const rand = Math.floor(10000 + Math.random() * 89999)
+  const destinationCode = input.destination.trim().slice(0, 3).toUpperCase() || 'DST'
+  const weightKg = parseInt(input.grossWeight.replace(/\D/g, ''), 10) || 1000
+  return {
+    ...base,
+    id: `SHP-${rand}-${destinationCode}`,
+    mode: input.mode,
+    status,
+    priority: input.priority,
+    origin: input.origin.trim() || 'Origin Pending',
+    originCode: 'ORX',
+    destination: input.destination.trim() || 'Destination Pending',
+    destinationCode,
+    grossWeight: `${weightKg.toLocaleString()} kg`,
+    grossWeightLbs: `${Math.round(weightKg * 2.2046).toLocaleString()} lbs`,
+    eta: 'TBD — booking confirmed',
+    nextCheckpoint: 'Carrier assignment in progress',
+    nextCheckpointIn: 'TBD',
+    currentPhase: 'Booking Confirmed',
+    waypoints: [
+      { label: `ORX • ${input.origin.trim() || 'Origin Pending'}`, kind: 'origin' },
+      { label: 'BOOKED', kind: 'current' },
+      { label: 'Route Assignment', kind: 'checkpoint' },
+      { label: `${destinationCode} • ${input.destination.trim() || 'Destination Pending'}`, kind: 'destination' },
+    ],
+    milestones: milestonesFor(status),
+    timelineFillPct: timelineFillPct(status),
+  }
+}
+
 export type ActivityCategory = 'updates' | 'alerts' | 'customs' | 'delivered'
 
 export interface ActivityItem {
