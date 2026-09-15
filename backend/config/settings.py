@@ -44,7 +44,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'accounts',
 ]
+
+APPEND_SLASH = False
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -68,9 +71,16 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
     'https://logistics.shenodev.tech,https://admin.logistics.shenodev.tech,http://localhost:3000',
 ).split(',')
 
+# Session cookie shared with the Nuxt frontend (httpOnly JWT in ``shenoflow_session``).
+AUTH_COOKIE_NAME = os.environ.get('DJANGO_AUTH_COOKIE_NAME', 'shenoflow_session')
+AUTH_COOKIE_SECURE = os.environ.get('DJANGO_AUTH_COOKIE_SECURE', 'true').lower() == 'true'
+AUTH_COOKIE_DOMAIN = os.environ.get('DJANGO_AUTH_COOKIE_DOMAIN', '') or None
+AUTH_COOKIE_SAMESITE = 'lax'
+AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'accounts.authentication.SessionCookieJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

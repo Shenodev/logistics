@@ -1,0 +1,131 @@
+import os
+
+from django.conf import settings
+from django.contrib.auth import authenticate, get_user_model
+
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
+
+User = get_user_model()
+
+
+def user_payload(user):
+    return {
+        'id': str(user.id),
+        'email': user.email,
+        'name': user.first_name or user.email,
+        'role': 'admin' if user.is_staff else 'user',
+    }
+
+
+def set_session_cookie(response, user):
+    token = AccessToken.for_user(user)
+    response.set_cookie(
+        settings.AUTH_COOKIE_NAME,
+        str(token),
+        max_age=settings.AUTH_COOKIE_MAX_AGE,
+        domain=settings.AUTH_COOKIE_DOMAIN,
+        path='/',
+        secure=settings.AUTH_COOKIE_SECURE,
+        httponly=True,
+        samesite=settings.AUTH_COOKIE_SAMESITE,
+    )
+
+
+def clear_session_cookie(response):
+    response.set_cookie(
+        settings.AUTH_COOKIE_NAME,
+        '',
+        max_age=0,
+        domain=settings.AUTH_COOKIE_DOMAIN,
+        path='/',
+        secure=settings.AUTH_COOKIE_SECURE,
+        httponly=True,
+        samesite=settings.AUTH_COOKIE_SAMESITE,
+    )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    email = str(request.data.get('email') or '').strip().lower()
+    password = str(request.data.get('password') or '')
+
+    if not email or not password:
+        return Response(
+            {'statusMessage': 'Email and password are required'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user = authenticate(request, username=email, password=password)
+    if user is None:
+        return Response(
+            {'statusMessage': 'Invalid credentials'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    response = Response({'user': user_payload(user)})
+    set_session_cookie(response, user)
+    return response
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup_view(request):
+    name = str(request.data.get('name') or '').strip()
+    email = str(request.data.get('email') or '').strip().lower()
+    password = str(request.data.get('password') or '')
+
+    if not name or not email or not password:
+        return Response(
+            {'statusMessage': 'Name, email and password are required'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if len(password) < 8:
+        return Response(
+            {'statusMessage': 'Password must be at least 8 characters'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    reserved = {
+        os.environ.get('DJANGO_DEV_ADMIN_EMAIL', 'admin@sheno.dev'),
+        os.environ.get('DJANGO_DEV_USER_EMAIL', 'user@sheno.dev'),
+    }
+    if email in reserved or User.objects.filter(email=email).exists():
+        return Response(
+            {'statusMessage': 'An account with this email already exists'},
+            status=status.HTTP_409_CONFLICT,
+        )
+
+    try:
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=name,
+        )
+    except Exception:
+        return Response(
+            {'statusMessage': 'An account with this email already exists'},
+            status=status.HTTP_409_CONFLICT,
+        )
+
+    response = Response({'user': user_payload(user)}, status=status.HTTP_201_CREATED)
+    set_session_cookie(response, user)
+    return response
+
+
+@api_view(['GET'])
+def me_view(request):
+    return Response({'user': user_payload(request.user)})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def logout_view(request):
+    response = Response({'ok': True})
+    clear_session_cookie(response)
+    return response

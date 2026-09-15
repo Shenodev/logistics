@@ -19,7 +19,11 @@ function authRequest<T>(url: string, options: Record<string, unknown> = {}): Pro
   const base = String(useRuntimeConfig().public.apiBase ?? '').replace(/\/+$/, '')
   const target = base ? url : `/api${url}`
   const fetcher = import.meta.server ? useRequestFetch() : $fetch
-  return fetcher<T>(target, { baseURL: base || undefined, ...options })
+  return fetcher<T>(target, {
+    baseURL: base || undefined,
+    credentials: base ? 'include' : 'same-origin',
+    ...options,
+  })
 }
 
 function getAuthErrorMessage(error: unknown): string {

@@ -22,16 +22,7 @@ export default defineNuxtConfig({
     public: {
       appDomain: 'logistics.shenodev.tech',
       adminSubdomain: 'admin',
-      apiBase: '',
-    },
-    auth: {
-      sessionSecret: 'shenoflow-dev-secret-change-me',
-      sessionTtlSeconds: 60 * 60 * 24 * 7,
-      cookieSecure: true,
-      devAdminEmail: 'admin@sheno.dev',
-      devAdminPassword: 'admin123',
-      devUserEmail: 'user@sheno.dev',
-      devUserPassword: 'user123',
+      apiBase: 'http://localhost:8000',
     },
   },
   vite: {
