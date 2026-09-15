@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Global Analytics &amp; Operational Intelligence | ORBITAL LOGISTICS</title>
+<!-- Google Fonts: Sora & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Sora:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed": "#2d1600",
+            "secondary-fixed": "#dce1ff",
+            "on-secondary": "#002780",
+            "on-background": "#dae2fd",
+            "surface-bright": "#31394d",
+            "on-primary-container": "#00424f",
+            "outline": "#869397",
+            "primary-container": "#06b6d4",
+            "surface-variant": "#2d3449",
+            "tertiary-fixed": "#ffdcbf",
+            "inverse-on-surface": "#283044",
+            "on-primary-fixed-variant": "#004e5c",
+            "primary-fixed-dim": "#4cd7f6",
+            "on-primary-fixed": "#001f26",
+            "primary-fixed": "#acedff",
+            "surface": "#0b1326",
+            "outline-variant": "#3d494c",
+            "on-surface-variant": "#bcc9cd",
+            "on-secondary-fixed-variant": "#0039b3",
+            "on-secondary-fixed": "#001550",
+            "on-tertiary-fixed-variant": "#6a3b00",
+            "error-container": "#93000a",
+            "background": "#0b1326",
+            "surface-container-highest": "#2d3449",
+            "on-surface": "#dae2fd",
+            "inverse-primary": "#00687a",
+            "tertiary-fixed-dim": "#ffb873",
+            "on-error-container": "#ffdad6",
+            "on-primary": "#003640",
+            "tertiary": "#ffb873",
+            "surface-container": "#171f33",
+            "on-secondary-container": "#d4dbff",
+            "secondary-fixed-dim": "#b6c4ff",
+            "surface-container-high": "#222a3d",
+            "surface-tint": "#4cd7f6",
+            "inverse-surface": "#dae2fd",
+            "on-tertiary-container": "#5b3200",
+            "error": "#ffb4ab",
+            "tertiary-container": "#e89337",
+            "on-tertiary": "#4b2800",
+            "secondary": "#b6c4ff",
+            "secondary-container": "#004fef",
+            "surface-container-low": "#131b2e",
+            "primary": "#4cd7f6",
+            "surface-container-lowest": "#060e20",
+            "surface-dim": "#0b1326",
+            "on-error": "#690005"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "gutter-lg": "1.5rem",
+            "margin": "1rem",
+            "margin-md": "1.5rem",
+            "margin-lg": "2rem"
+          },
+          "fontFamily": {
+            "body-md": ["Inter"],
+            "telemetry-numeric": ["Inter"],
+            "label-sm": ["Inter"],
+            "headline-lg": ["Sora"],
+            "body-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-sm": ["Sora"],
+            "headline-lg-mobile": ["Sora"],
+            "body-lg": ["Inter"],
+            "display": ["Sora"],
+            "headline-md": ["Sora"]
+          },
+          "fontSize": {
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "telemetry-numeric": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "display": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    /* Tabular numeric alignments & refined scrollbar */
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b1326; }
+    ::-webkit-scrollbar-thumb { background: #3d494c; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #869397; }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- ================= TOP NAVIGATION BAR (Shared Component JSON) ================= -->
+<header class="flex justify-between items-center h-16 w-full px-space-lg bg-surface-container border-b border-outline-variant sticky top-0 z-50">
+<!-- Left: Brand Logo & Global Search -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="deployed_code">deployed_code</span>
+</div>
+<span class="text-headline-sm font-headline-sm font-semibold tracking-wider text-primary">ORBITAL LOGISTICS</span>
+</div>
+<!-- Search Bar on Left -->
+<div class="relative hidden md:flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline text-[18px]" data-icon="search">search</span>
+<input class="bg-surface-container-low border border-outline-variant rounded text-on-surface placeholder:text-outline text-label-md font-label-md pl-9 pr-8 py-1.5 w-80 focus:outline-none focus:border-primary transition-colors" placeholder="Search metrics, corridors, or accounts (Press /)" type="text"/>
+<span class="absolute right-2.5 px-1 py-0.5 rounded bg-surface-container-high border border-outline-variant text-[10px] text-outline font-mono">⌘K</span>
+</div>
+</div>
+<!-- Center: Global Navigation Links -->
+<nav class="hidden lg:flex items-center gap-space-lg h-full">
+<a class="text-on-surface-variant hover:text-on-surface hover:border-primary transition-colors duration-150 text-label-md font-label-md flex items-center h-full px-space-xs border-b-2 border-transparent" href="#">Network Operations</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:border-primary transition-colors duration-150 text-label-md font-label-md flex items-center h-full px-space-xs border-b-2 border-transparent" href="#">Carrier Hub</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:border-primary transition-colors duration-150 text-label-md font-label-md flex items-center h-full px-space-xs border-b-2 border-transparent" href="#">Manifest Direct</a>
+</nav>
+<!-- Right: Trailing Actions, Trailing Icons & Profile -->
+<div class="flex items-center gap-space-md">
+<!-- Icon Actions -->
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<button class="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-container-high hover:text-primary transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[18px]" data-icon="notifications">notifications</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-container-high hover:text-primary transition-colors" title="Live Telemetry Sensors">
+<span class="material-symbols-outlined text-[18px]" data-icon="sensors">sensors</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center hover:bg-surface-container-high hover:text-primary transition-colors" title="Help &amp; Guides">
+<span class="material-symbols-outlined text-[18px]" data-icon="help">help</span>
+</button>
+</div>
+<div class="h-6 w-px bg-outline-variant"></div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-space-sm">
+<button class="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:border-error hover:text-error text-label-md font-label-md text-on-surface rounded active:scale-[0.98] transition-all">
+          Emergency Hold
+        </button>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-label-md text-label-md font-semibold rounded hover:bg-primary-fixed transition-colors active:scale-[0.98] flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+          New Dispatch
+        </button>
+</div>
+<!-- Profile Avatar -->
+<div class="flex items-center gap-space-sm pl-space-xs">
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover bg-surface-container-high" data-alt="A technical portrait headshot of a female logistics dispatcher operations officer wearing a high-tech communication headset in a dark command room illuminated by subtle electric cyan and cool blue telemetry screens, professional cinematic digital aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1wxrXxtEHfsYiApz_dHPoawcuwH_wi2AIVjxhjKyQMrMhwaTQb299n0G3vmkv4JL8TmE1N6eSE_rtRK3c-tp71A-vHDletN1eCUFEY0ltU9Lvn0YUGpmfvISyuuN-hNWL2MpPVKa0bofktWncjKVOn8jbh8RxRilg4OVdYJj43qJG92IqXf3p_tcFiBgHtbm9b6d9uM6LcWWuQ7K_6BuDWOfE8QorjYc-s-IuLculgNVJZc9KEFNvFQ"/>
+</div>
+</div>
+</header>
+<!-- ================= MAIN WORKSPACE WRAPPER ================= -->
+<div class="flex flex-1 w-full overflow-hidden">
+<!-- ================= SIDE NAVIGATION BAR (Shared Component JSON) ================= -->
+<aside class="w-64 flex-shrink-0 bg-surface-container-low border-r border-outline-variant flex flex-col justify-between hidden md:flex min-h-[calc(100vh-4rem)]">
+<div class="flex flex-col">
+<!-- Dispatcher Identification Header -->
+<div class="p-space-md border-b border-outline-variant flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined text-[20px]" data-icon="token">token</span>
+</div>
+<div>
+<div class="text-label-md font-label-md font-semibold text-on-surface flex items-center gap-1.5">
+              Dispatcher One
+              <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+</div>
+<div class="text-label-sm font-label-sm text-outline">Global Fleet Control #402</div>
+</div>
+</div>
+<!-- Primary Navigation Tabs -->
+<nav class="py-space-sm flex flex-col">
+<!-- 1. Command Center -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 text-label-sm font-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="dashboard">dashboard</span>
+<span>Command Center</span>
+</a>
+<!-- 2. Order Management -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 text-label-sm font-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="inventory_2">inventory_2</span>
+<span>Order Management</span>
+</a>
+<!-- 3. Fleet Telemetry -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 text-label-sm font-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="local_shipping">local_shipping</span>
+<span>Fleet Telemetry</span>
+</a>
+<!-- 4. Route Planning -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 text-label-sm font-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="alt_route">alt_route</span>
+<span>Route Planning</span>
+</a>
+<!-- 5. Global Analytics (ACTIVE TAB - Exactly mapped to page intent) -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-primary bg-surface-container-high border-l-2 border-primary font-medium text-label-sm font-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="monitoring">monitoring</span>
+<span>Global Analytics</span>
+</a>
+<!-- 6. Settings -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 text-label-sm font-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<!-- Sidebar CTA Button: "Broadcast Alert" -->
+<div class="px-space-md py-space-sm">
+<button class="w-full py-2 px-3 rounded bg-surface-container-high border border-outline-variant hover:border-tertiary text-tertiary flex items-center justify-center gap-2 text-label-sm font-label-sm transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]" data-icon="cell_tower">cell_tower</span>
+            Broadcast Alert
+          </button>
+</div>
+</div>
+<!-- Footer Links: System Status & Documentation -->
+<div class="p-space-md border-t border-outline-variant space-y-1">
+<div class="flex items-center justify-between px-space-sm py-1.5 text-label-sm font-label-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="radar">radar</span>
+<span>System Status</span>
+</div>
+<span class="text-primary font-mono text-[10px] bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">99.98%</span>
+</div>
+<a class="flex items-center gap-2 px-space-sm py-1.5 text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]" data-icon="terminal">terminal</span>
+<span>Documentation</span>
+</a>
+</div>
+</aside>
+<!-- ================= MAIN CONTENT AREA ================= -->
+<main class="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-6">
+<!-- ================= HEADER SECTION & TOP ROW CONTROLS ================= -->
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-outline-variant pb-6">
+<div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-primary uppercase tracking-wider mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+            Mission Telemetry &amp; Corridor Yield
+          </div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface font-semibold tracking-tight">Global Analytics &amp; Operational Intelligence</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">Corridor profitability, fleet efficiency indices, and autonomous telemetry reports.</p>
+</div>
+<!-- Action Controls -->
+<div class="flex flex-wrap items-center gap-3">
+<!-- Date Range Picker Component -->
+<div class="flex items-center bg-surface-container border border-outline-variant rounded-lg p-1">
+<div class="flex items-center gap-2 px-3 py-1.5 text-on-surface text-label-md font-label-md border-r border-outline-variant/60">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="calendar_month">calendar_month</span>
+<span>Oct 1, 2024 - Oct 28, 2024</span>
+<span class="text-outline text-label-sm font-label-sm font-normal">(Last 30 Days)</span>
+</div>
+<!-- Quick Presets -->
+<div class="flex items-center gap-1 px-1.5">
+<button class="px-2 py-1 text-label-sm font-label-sm text-outline hover:text-on-surface rounded hover:bg-surface-container-high transition-colors">7D</button>
+<button class="px-2 py-1 text-label-sm font-label-sm text-primary font-semibold bg-surface-container-high rounded border border-outline-variant">30D</button>
+<button class="px-2 py-1 text-label-sm font-label-sm text-outline hover:text-on-surface rounded hover:bg-surface-container-high transition-colors">90D</button>
+<button class="px-2 py-1 text-label-sm font-label-sm text-outline hover:text-on-surface rounded hover:bg-surface-container-high transition-colors">YTD</button>
+</div>
+</div>
+<!-- Compare Period Toggle -->
+<button class="flex items-center gap-2 px-3 py-2 bg-surface-container border border-outline-variant rounded-lg text-label-md font-label-md text-on-surface-variant hover:border-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px] text-outline" data-icon="compare_arrows">compare_arrows</span>
+<span>Compare to: <strong class="text-on-surface font-medium">Previous Period (-30d)</strong></span>
+</button>
+<!-- Export Report Button with Dropdown -->
+<div class="relative">
+<button class="flex items-center gap-2 px-3.5 py-2 bg-primary text-on-primary font-semibold rounded-lg text-label-md font-label-md hover:bg-primary-fixed transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[18px]" data-icon="download">download</span>
+<span>Export Report</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ================= KPI STRIP (4 CARDS) ================= -->
+<section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Metric 1: Gross Fleet Revenue -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+<span class="uppercase tracking-wider">Gross Fleet Revenue</span>
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="payments">payments</span>
+</div>
+<div class="mt-3 flex items-baseline justify-between">
+<span class="text-headline-md font-headline-md text-on-surface font-bold tabular-nums">$1.42M</span>
+<div class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-primary/10 border border-primary/20 text-primary">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+              +14.2% MoM
+            </div>
+</div>
+<div class="mt-2 text-body-sm font-body-sm text-on-surface-variant">vs $1.24M scheduled baseline</div>
+</div>
+<!-- Metric 2: Avg Cost Per Freight Mile -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+<span class="uppercase tracking-wider">Avg Cost Per Freight Mile</span>
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="straighten">straighten</span>
+</div>
+<div class="mt-3 flex items-baseline justify-between">
+<span class="text-headline-md font-headline-md text-on-surface font-bold tabular-nums">$2.18</span>
+<div class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-primary/10 border border-primary/20 text-primary">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_down">trending_down</span>
+              -4.1% vs target
+            </div>
+</div>
+<div class="mt-2 text-body-sm font-body-sm text-on-surface-variant">Optimal margin threshold: &lt;$2.25</div>
+</div>
+<!-- Metric 3: Fleet Utilization Rate -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+<span class="uppercase tracking-wider">Fleet Utilization Rate</span>
+<span class="material-symbols-outlined text-[18px] text-tertiary" data-icon="alt_route">alt_route</span>
+</div>
+<div class="mt-3 flex items-baseline justify-between">
+<span class="text-headline-md font-headline-md text-on-surface font-bold tabular-nums">91.4%</span>
+<div class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-primary/10 border border-primary/20 text-primary">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+              +2.8%
+            </div>
+</div>
+<div class="mt-2 text-body-sm font-body-sm text-on-surface-variant">148 of 162 orbital carriers active</div>
+</div>
+<!-- Metric 4: Mean On-Time Fulfillment -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-4 flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+<span class="uppercase tracking-wider">Mean On-Time Fulfillment</span>
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="verified">verified</span>
+</div>
+<div class="mt-3 flex items-baseline justify-between">
+<span class="text-headline-md font-headline-md text-on-surface font-bold tabular-nums">98.7%</span>
+<div class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container-high border border-outline-variant text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mr-0.5"></span>
+              Optimal
+            </div>
+</div>
+<div class="mt-2 text-body-sm font-body-sm text-on-surface-variant">99.2% required on Tier-1 SLA</div>
+</div>
+</section>
+<!-- ================= MIDDLE SECTION: TWO SIDE-BY-SIDE ANALYTICAL CARDS ================= -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- CARD 1: Financial Performance (Bar Chart Visualization) -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-5 flex flex-col justify-between">
+<div>
+<!-- Card Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-outline-variant/60 pb-3">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-semibold">Financial Performance: Revenue Trends vs. Cost Per Mile</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Corridor yield analysis across 4 weekly rolling cycles</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Download Chart Data">
+<span class="material-symbols-outlined text-[18px]" data-icon="save_alt">save_alt</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Expand View">
+<span class="material-symbols-outlined text-[18px]" data-icon="fullscreen">fullscreen</span>
+</button>
+</div>
+</div>
+<!-- Legend Strip -->
+<div class="flex flex-wrap items-center gap-4 mt-4 text-label-sm font-label-sm">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-primary inline-block"></span>
+<span class="text-on-surface">Revenue ($k)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-secondary-container inline-block"></span>
+<span class="text-on-surface-variant">Fuel &amp; Operational Cost ($k)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-4 h-0.5 bg-tertiary inline-block"></span>
+<span class="text-tertiary">Net Margin (%)</span>
+</div>
+</div>
+<!-- High-Density Dual-Axis Bar Chart Simulation -->
+<div class="mt-6 relative h-64 flex flex-col justify-end pt-4 pb-2 border-b border-outline-variant">
+<!-- Horizontal Hairline Grid Lines -->
+<div class="absolute inset-x-0 top-0 border-b border-outline-variant/30 flex justify-between text-[10px] text-outline tabular-nums">
+<span>$400k</span><span>30%</span>
+</div>
+<div class="absolute inset-x-0 top-1/4 border-b border-outline-variant/30 flex justify-between text-[10px] text-outline tabular-nums">
+<span>$300k</span><span>22%</span>
+</div>
+<div class="absolute inset-x-0 top-2/4 border-b border-outline-variant/30 flex justify-between text-[10px] text-outline tabular-nums">
+<span>$200k</span><span>15%</span>
+</div>
+<div class="absolute inset-x-0 top-3/4 border-b border-outline-variant/30 flex justify-between text-[10px] text-outline tabular-nums">
+<span>$100k</span><span>8%</span>
+</div>
+<!-- Cluster Bars Container (Weeks 1 to 4) -->
+<div class="relative z-10 grid grid-cols-4 gap-4 h-full items-end px-4">
+<!-- Week 1 -->
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="flex items-end gap-1.5 h-44 w-full justify-center">
+<!-- Revenue Bar -->
+<div class="w-6 bg-primary rounded-t-sm transition-all group-hover:brightness-110" style="height: 68%;" title="Week 1 Revenue: $290k"></div>
+<!-- Cost Bar -->
+<div class="w-6 bg-secondary-container rounded-t-sm transition-all group-hover:brightness-110" style="height: 48%;" title="Week 1 Cost: $192k"></div>
+</div>
+<div class="w-full text-center mt-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant group-hover:text-primary transition-colors">Week 1</span>
+<div class="text-[10px] text-outline">Oct 1-7</div>
+</div>
+</div>
+<!-- Week 2 -->
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="flex items-end gap-1.5 h-44 w-full justify-center">
+<div class="w-6 bg-primary rounded-t-sm transition-all group-hover:brightness-110" style="height: 78%;" title="Week 2 Revenue: $335k"></div>
+<div class="w-6 bg-secondary-container rounded-t-sm transition-all group-hover:brightness-110" style="height: 52%;" title="Week 2 Cost: $208k"></div>
+</div>
+<div class="w-full text-center mt-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant group-hover:text-primary transition-colors">Week 2</span>
+<div class="text-[10px] text-outline">Oct 8-14</div>
+</div>
+</div>
+<!-- Week 3 -->
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="flex items-end gap-1.5 h-44 w-full justify-center">
+<div class="w-6 bg-primary rounded-t-sm transition-all group-hover:brightness-110" style="height: 84%;" title="Week 3 Revenue: $360k"></div>
+<div class="w-6 bg-secondary-container rounded-t-sm transition-all group-hover:brightness-110" style="height: 56%;" title="Week 3 Cost: $224k"></div>
+</div>
+<div class="w-full text-center mt-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant group-hover:text-primary transition-colors">Week 3</span>
+<div class="text-[10px] text-outline">Oct 15-21</div>
+</div>
+</div>
+<!-- Week 4 -->
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="flex items-end gap-1.5 h-44 w-full justify-center">
+<div class="w-6 bg-primary rounded-t-sm transition-all group-hover:brightness-110" style="height: 96%;" title="Week 4 Revenue: $435k"></div>
+<div class="w-6 bg-secondary-container rounded-t-sm transition-all group-hover:brightness-110" style="height: 59%;" title="Week 4 Cost: $236k"></div>
+</div>
+<div class="w-full text-center mt-2">
+<span class="text-label-sm font-label-sm text-primary font-semibold">Week 4</span>
+<div class="text-[10px] text-primary">Oct 22-28</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Annotation Strip -->
+<div class="mt-4 pt-3 border-t border-outline-variant/40 flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="info">info</span>
+<span>Net operational spread widened by <strong>+5.2%</strong> in W4 due to route chaining.</span>
+</div>
+<span class="text-primary text-label-sm font-label-sm font-semibold hover:underline cursor-pointer">Full Ledger →</span>
+</div>
+</div>
+<!-- CARD 2: Operational Peak Times & Corridor Congestion (Heatmap Visualization) -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-5 flex flex-col justify-between">
+<div>
+<!-- Card Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-outline-variant/60 pb-3">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-semibold">Operational Peak Times &amp; Corridor Congestion</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Dispatch density and bottleneck index by hour and operating quadrant</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary text-[11px] font-semibold">Live Telemetry</span>
+</div>
+</div>
+<!-- Heatmap Density Legend -->
+<div class="flex items-center justify-between mt-4">
+<span class="text-label-sm font-label-sm text-outline">Dispatch Load:</span>
+<div class="flex items-center gap-1.5 text-[10px] text-outline">
+<span>Low</span>
+<span class="w-3.5 h-3 rounded-sm bg-surface-container-high border border-outline-variant inline-block"></span>
+<span class="w-3.5 h-3 rounded-sm bg-primary/20 inline-block"></span>
+<span class="w-3.5 h-3 rounded-sm bg-primary/50 inline-block"></span>
+<span class="w-3.5 h-3 rounded-sm bg-primary inline-block"></span>
+<span class="w-3.5 h-3 rounded-sm bg-tertiary inline-block"></span>
+<span>Peak Alert</span>
+</div>
+</div>
+<!-- High-Density Heatmap Grid (7 Days x 6 Time Windows) -->
+<div class="mt-4 overflow-x-auto">
+<div class="min-w-[420px]">
+<!-- Time Window Header -->
+<div class="grid grid-cols-7 gap-1 text-[10px] font-mono text-outline mb-1 text-center">
+<div class="text-left pl-1">DAY</div>
+<div>00-04</div>
+<div>04-08</div>
+<div>08-12</div>
+<div>12-16</div>
+<div>16-20</div>
+<div>20-24</div>
+</div>
+<!-- Heatmap Rows -->
+<div class="space-y-1 text-label-sm font-label-sm">
+<!-- Mon -->
+<div class="grid grid-cols-7 gap-1 items-center">
+<span class="text-outline text-[11px]">Mon</span>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">12%</div>
+<div class="h-6 rounded bg-primary/20 flex items-center justify-center text-[10px] text-primary">34%</div>
+<div class="h-6 rounded bg-primary/60 text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">71%</div>
+<div class="h-6 rounded bg-primary text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">88%</div>
+<div class="h-6 rounded bg-primary/40 flex items-center justify-center text-[10px] text-on-surface">54%</div>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">18%</div>
+</div>
+<!-- Tue -->
+<div class="grid grid-cols-7 gap-1 items-center">
+<span class="text-outline text-[11px]">Tue</span>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">10%</div>
+<div class="h-6 rounded bg-primary/30 flex items-center justify-center text-[10px] text-primary">42%</div>
+<div class="h-6 rounded bg-primary text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">85%</div>
+<div class="h-6 rounded bg-primary text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">91%</div>
+<div class="h-6 rounded bg-primary/50 flex items-center justify-center text-[10px] text-on-surface">62%</div>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">21%</div>
+</div>
+<!-- Wed -->
+<div class="grid grid-cols-7 gap-1 items-center">
+<span class="text-outline text-[11px]">Wed</span>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">15%</div>
+<div class="h-6 rounded bg-primary/40 flex items-center justify-center text-[10px] text-on-surface">50%</div>
+<div class="h-6 rounded bg-primary text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">89%</div>
+<div class="h-6 rounded bg-primary text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">94%</div>
+<div class="h-6 rounded bg-primary/60 text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">78%</div>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">25%</div>
+</div>
+<!-- Thu (PEAK) -->
+<div class="grid grid-cols-7 gap-1 items-center bg-tertiary/5 p-0.5 rounded border border-tertiary/20">
+<span class="text-tertiary text-[11px] font-semibold">Thu</span>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">18%</div>
+<div class="h-6 rounded bg-primary/40 flex items-center justify-center text-[10px] text-on-surface">58%</div>
+<div class="h-6 rounded bg-primary text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">92%</div>
+<div class="h-6 rounded bg-tertiary text-surface-container-lowest font-bold flex items-center justify-center text-[10px] shadow-sm">99%</div>
+<div class="h-6 rounded bg-tertiary/80 text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">96%</div>
+<div class="h-6 rounded bg-primary/30 flex items-center justify-center text-[10px] text-primary">32%</div>
+</div>
+<!-- Fri -->
+<div class="grid grid-cols-7 gap-1 items-center">
+<span class="text-outline text-[11px]">Fri</span>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">14%</div>
+<div class="h-6 rounded bg-primary/30 flex items-center justify-center text-[10px] text-primary">45%</div>
+<div class="h-6 rounded bg-primary text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">82%</div>
+<div class="h-6 rounded bg-primary text-surface-container-lowest font-bold flex items-center justify-center text-[10px]">87%</div>
+<div class="h-6 rounded bg-primary/50 flex items-center justify-center text-[10px] text-on-surface">65%</div>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">28%</div>
+</div>
+<!-- Sat -->
+<div class="grid grid-cols-7 gap-1 items-center">
+<span class="text-outline text-[11px]">Sat</span>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">8%</div>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">18%</div>
+<div class="h-6 rounded bg-primary/30 flex items-center justify-center text-[10px] text-primary">36%</div>
+<div class="h-6 rounded bg-primary/40 flex items-center justify-center text-[10px] text-on-surface">42%</div>
+<div class="h-6 rounded bg-primary/20 flex items-center justify-center text-[10px] text-primary">30%</div>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">12%</div>
+</div>
+<!-- Sun -->
+<div class="grid grid-cols-7 gap-1 items-center">
+<span class="text-outline text-[11px]">Sun</span>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">5%</div>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">12%</div>
+<div class="h-6 rounded bg-primary/20 flex items-center justify-center text-[10px] text-primary">22%</div>
+<div class="h-6 rounded bg-primary/20 flex items-center justify-center text-[10px] text-primary">28%</div>
+<div class="h-6 rounded bg-primary/20 flex items-center justify-center text-[10px] text-primary">25%</div>
+<div class="h-6 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-[10px] text-outline">9%</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Alert Callout -->
+<div class="mt-4 pt-3 border-t border-outline-variant/40 flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined text-[16px]" data-icon="warning">warning</span>
+<span><strong>Peak Congestion Window:</strong> Thu 14:00 - 18:00 (JFK-EWR Corridor)</span>
+</div>
+<span class="text-on-surface-variant font-mono text-[11px]">+32m latency</span>
+</div>
+</div>
+</section>
+<!-- ================= BOTTOM SECTION: CUSTOM REPORT BUILDER ================= -->
+<section class="bg-surface-container border border-outline-variant rounded-xl p-5 sm:p-6">
+<div class="border-b border-outline-variant/60 pb-4 mb-5">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded bg-primary"></span>
+<h2 class="text-headline-sm font-headline-sm text-on-surface font-semibold">Autonomous Custom Report Builder</h2>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">Configure multi-dimensional telemetry extracts for automated billing, carrier SLA audits, and fleet auditing.</p>
+</div>
+<!-- 4-Column Form Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+<!-- Dropdown 1: Metrics -->
+<div class="flex flex-col space-y-2">
+<label class="text-label-sm font-label-sm text-outline uppercase tracking-wider flex items-center justify-between">
+<span>Telemetry Metrics</span>
+<span class="text-primary text-[10px] font-mono">4 ACTIVE</span>
+</label>
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-2.5 min-h-[120px] flex flex-col justify-between">
+<div class="flex flex-wrap gap-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-primary/10 border border-primary/30 text-primary text-[11px] font-medium">
+                  Revenue Yield
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-primary/10 border border-primary/30 text-primary text-[11px] font-medium">
+                  Cost per Ton-Km
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-primary/10 border border-primary/30 text-primary text-[11px] font-medium">
+                  Idle Fuel Loss
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-primary/10 border border-primary/30 text-primary text-[11px] font-medium">
+                  On-Time SLA %
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+</div>
+<button class="mt-2 text-left text-label-sm font-label-sm text-outline hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="add">add</span>
+                + Add Metric
+              </button>
+</div>
+</div>
+<!-- Dropdown 2: Dimensions -->
+<div class="flex flex-col space-y-2">
+<label class="text-label-sm font-label-sm text-outline uppercase tracking-wider flex items-center justify-between">
+<span>Dimensions</span>
+<span class="text-primary text-[10px] font-mono">3 ACTIVE</span>
+</label>
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-2.5 min-h-[120px] flex flex-col justify-between">
+<div class="flex flex-wrap gap-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary-container/40 border border-secondary-container text-secondary text-[11px] font-medium">
+                  Corridor Hub
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary-container/40 border border-secondary-container text-secondary text-[11px] font-medium">
+                  Vehicle Class
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary-container/40 border border-secondary-container text-secondary text-[11px] font-medium">
+                  Transit Mode
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+</div>
+<button class="mt-2 text-left text-label-sm font-label-sm text-outline hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="add">add</span>
+                + Add Dimension
+              </button>
+</div>
+</div>
+<!-- Dropdown 3: Drivers & Fleets -->
+<div class="flex flex-col space-y-2">
+<label class="text-label-sm font-label-sm text-outline uppercase tracking-wider flex items-center justify-between">
+<span>Drivers &amp; Fleets</span>
+<span class="text-primary text-[10px] font-mono">FILTERED</span>
+</label>
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-2.5 min-h-[120px] flex flex-col justify-between">
+<div class="flex flex-wrap gap-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-surface-container-high border border-outline-variant text-on-surface text-[11px] font-medium">
+                  All Active Drivers (148)
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-surface-container-high border border-outline-variant text-on-surface text-[11px] font-medium">
+                  Regional Contractor Hubs
+                  <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-on-surface" data-icon="close">close</span>
+</span>
+</div>
+<button class="mt-2 text-left text-label-sm font-label-sm text-outline hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="tune">tune</span>
+                + Filter Cohort
+              </button>
+</div>
+</div>
+<!-- Dropdown 4: Output Format & Schedule -->
+<div class="flex flex-col space-y-2">
+<label class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Output Format &amp; Schedule</label>
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-2.5 min-h-[120px] flex flex-col justify-between">
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-on-surface">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-tertiary" data-icon="schedule_send">schedule_send</span>
+                    Weekly Cron Delivery
+                  </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-[10px] font-mono text-outline">08:00 UTC</span>
+</div>
+<div class="p-2 rounded bg-surface-container border border-outline-variant text-body-sm font-body-sm text-on-surface-variant break-all">
+                  Automated Weekly PDF to <strong class="text-primary font-mono text-[11px]">ops-audit@orbitallogistics.com</strong>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-outline-variant/40 text-[11px] text-outline">
+<span>PDF, CSV, XLSX</span>
+<button class="text-primary hover:underline">Change Recipient</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Custom Report Builder Action Bar -->
+<div class="mt-6 pt-4 border-t border-outline-variant/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<!-- Left Status Engine Indicator -->
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>Estimated query runtime: <strong class="text-on-surface font-mono">~1.2s</strong> • Approx. <strong class="text-on-surface font-mono">42,000</strong> data points</span>
+</div>
+<!-- Right Action Buttons -->
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 bg-surface-container-high border border-outline-variant hover:border-outline text-on-surface font-label-md text-label-md rounded-lg active:scale-[0.98] transition-all">
+              Save as Template
+            </button>
+<button class="px-5 py-2 bg-primary text-on-primary font-semibold font-label-md text-label-md rounded-lg hover:bg-primary-fixed transition-colors active:scale-[0.98] flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="bolt">bolt</span>
+              Generate Custom Report
+            </button>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

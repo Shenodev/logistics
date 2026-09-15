@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Orbital Logistics - Command Center Live Overview</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Sora:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary": "#003640",
+            "error": "#ffb4ab",
+            "inverse-on-surface": "#283044",
+            "on-error-container": "#ffdad6",
+            "surface": "#0b1326",
+            "on-tertiary-fixed-variant": "#6a3b00",
+            "tertiary-container": "#e89337",
+            "outline-variant": "#3d494c",
+            "error-container": "#93000a",
+            "surface-container-low": "#131b2e",
+            "surface-container-highest": "#2d3449",
+            "surface-dim": "#0b1326",
+            "on-secondary-fixed": "#001550",
+            "on-primary-fixed": "#001f26",
+            "inverse-primary": "#00687a",
+            "on-secondary": "#002780",
+            "tertiary": "#ffb873",
+            "outline": "#869397",
+            "surface-tint": "#4cd7f6",
+            "secondary": "#b6c4ff",
+            "surface-container-high": "#222a3d",
+            "tertiary-fixed-dim": "#ffb873",
+            "surface-container": "#171f33",
+            "on-secondary-fixed-variant": "#0039b3",
+            "inverse-surface": "#dae2fd",
+            "on-error": "#690005",
+            "primary": "#4cd7f6",
+            "on-tertiary-container": "#5b3200",
+            "secondary-container": "#004fef",
+            "secondary-fixed": "#dce1ff",
+            "on-surface": "#dae2fd",
+            "on-surface-variant": "#bcc9cd",
+            "background": "#0b1326",
+            "on-primary-container": "#00424f",
+            "secondary-fixed-dim": "#b6c4ff",
+            "on-background": "#dae2fd",
+            "primary-fixed-dim": "#4cd7f6",
+            "surface-variant": "#2d3449",
+            "on-tertiary-fixed": "#2d1600",
+            "on-primary-fixed-variant": "#004e5c",
+            "on-tertiary": "#4b2800",
+            "primary-container": "#06b6d4",
+            "surface-bright": "#31394d",
+            "primary-fixed": "#acedff",
+            "tertiary-fixed": "#ffdcbf",
+            "on-secondary-container": "#d4dbff",
+            "surface-container-lowest": "#060e20"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-lg": "2rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "gutter": "1rem",
+            "space-xl": "2rem",
+            "margin": "1rem",
+            "gutter-lg": "1.5rem",
+            "space-lg": "1.5rem",
+            "margin-md": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Sora"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Sora"],
+            "headline-md": ["Sora"],
+            "telemetry-numeric": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "display": ["Sora"],
+            "headline-lg": ["Sora"],
+            "body-sm": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "telemetry-numeric": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "display": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-x-hidden min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- Shared Component: SideNavBar -->
+<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col justify-between z-40 bg-surface-container-low border-r border-outline-variant">
+<!-- Top Brand & Dispatcher Profile -->
+<div>
+<div class="h-16 px-space-lg flex items-center gap-space-sm border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="deployed_code" style="font-variation-settings: 'FILL' 1;">deployed_code</span>
+<div class="flex flex-col">
+<span class="text-headline-sm font-headline-sm text-primary tracking-widest leading-none">ORBITAL</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant tracking-wider">DISPATCH COMMAND</span>
+</div>
+</div>
+<!-- Dispatcher Unit Identity Block -->
+<div class="px-space-md py-space-sm border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary font-headline-sm">
+            D1
+          </div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-label-md font-label-md text-on-surface truncate">Dispatcher One</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant truncate">Global Fleet Control #402</span>
+</div>
+<div class="ml-auto w-2 h-2 rounded-full bg-primary-container"></div>
+</div>
+</div>
+<!-- Navigation Tabs (Command Center is active) -->
+<nav class="mt-space-sm space-y-space-xs px-space-xs">
+<!-- Item 1: Command Center (Active) -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-primary bg-surface-container-high border-l-2 border-primary font-medium transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">Command Center</span>
+</a>
+<!-- Item 2: Order Management -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-label-md font-label-md">Order Management</span>
+</a>
+<!-- Item 3: Fleet Telemetry -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="text-label-md font-label-md">Fleet Telemetry</span>
+</a>
+<!-- Item 4: Route Planning -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="alt_route">alt_route</span>
+<span class="text-label-md font-label-md">Route Planning</span>
+</a>
+<!-- Item 5: Global Analytics -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-label-md font-label-md">Global Analytics</span>
+</a>
+<!-- Item 6: Settings -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</nav>
+</div>
+<!-- CTA & Footer Links -->
+<div class="p-space-md border-t border-outline-variant space-y-space-md">
+<!-- Broadcast Alert CTA Button -->
+<button class="w-full h-10 px-space-md bg-secondary-container hover:bg-opacity-90 text-on-surface text-label-md font-label-md rounded-lg flex items-center justify-center gap-space-xs active:scale-[0.98] transition-transform duration-100 ease-out border border-outline-variant">
+<span class="material-symbols-outlined text-tertiary" data-icon="campaign">campaign</span>
+        Broadcast Alert
+      </button>
+<!-- System Radar & Status -->
+<div class="space-y-space-xs">
+<a class="flex items-center justify-between py-space-xs text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined" data-icon="radar">radar</span>
+<span>System Status</span>
+</div>
+<span class="text-primary-container text-label-sm font-label-sm">99.98%</span>
+</a>
+<a class="flex items-center gap-space-xs py-space-xs text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span>Documentation</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Workstation Canvas -->
+<div class="pl-64 flex flex-col min-h-screen">
+<!-- Top Bar Component: Shared Anchor Compliant -->
+<header class="flex justify-between items-center h-16 w-full px-space-lg bg-surface-container border-b border-outline-variant sticky top-0 z-30">
+<!-- Brand & Search cluster -->
+<div class="flex items-center gap-space-lg">
+<span class="text-headline-sm font-headline-sm font-semibold tracking-wider text-primary">ORBITAL LOGISTICS</span>
+<!-- Search Bar on Left -->
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full h-9 pl-9 pr-space-md bg-surface border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition-colors" placeholder="Search manifests, vehicles (TR-...), containers..." type="text"/>
+</div>
+<!-- Horizontal Nav Links -->
+<nav class="hidden lg:flex items-center gap-space-md">
+<a class="text-primary border-b-2 border-primary font-medium py-space-xs text-label-md font-label-md" href="#">Network Operations</a>
+<a class="text-on-surface-variant hover:text-on-surface py-space-xs text-label-md font-label-md transition-colors" href="#">Carrier Hub</a>
+<a class="text-on-surface-variant hover:text-on-surface py-space-xs text-label-md font-label-md transition-colors" href="#">Manifest Direct</a>
+</nav>
+</div>
+<!-- Action Cluster -->
+<div class="flex items-center gap-space-sm">
+<!-- Live Clock Indicator -->
+<div class="hidden xl:flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded border border-outline-variant mr-space-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-label-sm font-label-sm text-on-surface-variant tracking-wider">UTC 14:28:10</span>
+<span class="text-outline-variant">|</span>
+<span class="text-label-sm font-label-sm text-primary">OPTIMAL</span>
+</div>
+<!-- Trailing Icon Actions -->
+<button class="w-9 h-9 flex items-center justify-center rounded border border-outline-variant hover:border-primary text-on-surface-variant hover:text-primary transition-colors duration-150 relative" title="Notifications">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded border border-outline-variant hover:border-primary text-on-surface-variant hover:text-primary transition-colors duration-150" title="Sensors">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded border border-outline-variant hover:border-primary text-on-surface-variant hover:text-primary transition-colors duration-150" title="Help">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<!-- Trailing Secondary & Primary Actions -->
+<button class="h-9 px-space-md bg-surface-container-high border border-outline-variant hover:border-primary text-on-surface text-label-md font-label-md rounded active:scale-[0.98] transition-all duration-100 ease-out">
+          Emergency Hold
+        </button>
+<button class="h-9 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold rounded active:scale-[0.98] transition-all duration-100 ease-out flex items-center gap-space-xs">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+          New Dispatch
+        </button>
+</div>
+</header>
+<!-- Main Content Workstation Area -->
+<main class="p-space-lg space-y-space-lg flex-1">
+<!-- View Title & Top Sub-Bar Controls -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div>
+<h1 class="text-headline-md font-headline-md text-on-surface">Command Center Live Overview</h1>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Global multi-modal fleet status, active corridor tracking, and dispatch exception handling.</p>
+</div>
+<div class="flex items-center gap-space-sm self-start sm:self-auto">
+<button class="h-8 px-space-sm rounded bg-surface-container border border-outline-variant text-label-sm font-label-sm text-on-surface hover:border-primary flex items-center gap-space-xs transition-colors">
+<span class="material-symbols-outlined" data-icon="alt_route">alt_route</span>
+            Emergency Re-route
+          </button>
+<button class="h-8 px-space-sm rounded bg-surface-container border border-outline-variant text-label-sm font-label-sm text-on-surface hover:border-primary flex items-center gap-space-xs transition-colors">
+<span class="material-symbols-outlined" data-icon="file_download">file_download</span>
+            Export Telemetry
+          </button>
+</div>
+</div>
+<!-- HERO SECTION: Global Live Fleet Telemetry Map HUD -->
+<section class="relative bg-surface-container rounded-xl border border-outline-variant overflow-hidden h-[460px] flex flex-col justify-between">
+<!-- Synthetic Vector Map Blueprint Grid Canvas -->
+<div class="absolute inset-0 bg-surface-container-lowest pointer-events-none">
+<!-- Background SVG Vector Grid with Stylized Global Nodes and Corridors -->
+<svg class="w-full h-full opacity-35" preserveaspectratio="none" viewbox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern height="40" id="gridPattern" patternunits="userSpaceOnUse" width="40">
+<path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3d494c" stroke-width="0.75"></path>
+</pattern>
+</defs>
+<rect fill="url(#gridPattern)" height="100%" width="100%"></rect>
+<!-- Simplified Continental Outlines & Trajectories -->
+<!-- North America - Europe Arcs -->
+<path d="M 240 220 Q 420 120 620 190" fill="none" opacity="0.8" stroke="#06b6d4" stroke-dasharray="6,4" stroke-width="2"></path>
+<path d="M 280 260 Q 460 320 620 230" fill="none" opacity="0.7" stroke="#2861ff" stroke-dasharray="4,4" stroke-width="1.5"></path>
+<!-- Transpacific Route -->
+<path d="M 200 240 Q 60 200 20 280" fill="none" opacity="0.6" stroke="#06b6d4" stroke-width="1.75"></path>
+<!-- Europe - Asia Routes -->
+<path d="M 640 190 Q 820 180 980 340" fill="none" opacity="0.8" stroke="#06b6d4" stroke-width="2"></path>
+<path d="M 620 230 Q 750 360 960 380" fill="none" opacity="0.7" stroke="#06b6d4" stroke-dasharray="6,3" stroke-width="1.5"></path>
+<!-- Intra-European Feeder -->
+<path d="M 610 200 L 640 190" fill="none" stroke="#ffb873" stroke-width="2"></path>
+<!-- Hub Rings -->
+<circle cx="240" cy="220" fill="none" opacity="0.4" r="14" stroke="#06b6d4" stroke-width="1"></circle>
+<circle cx="240" cy="220" fill="#06b6d4" r="4"></circle>
+<circle cx="620" cy="190" fill="none" opacity="0.4" r="14" stroke="#06b6d4" stroke-width="1"></circle>
+<circle cx="620" cy="190" fill="#06b6d4" r="4"></circle>
+<circle cx="640" cy="200" fill="none" opacity="0.3" r="10" stroke="#06b6d4" stroke-width="1"></circle>
+<circle cx="640" cy="200" fill="#06b6d4" r="3"></circle>
+<circle cx="980" cy="340" fill="none" opacity="0.4" r="14" stroke="#06b6d4" stroke-width="1"></circle>
+<circle cx="980" cy="340" fill="#06b6d4" r="4"></circle>
+<circle cx="180" cy="250" fill="none" opacity="0.3" r="12" stroke="#06b6d4" stroke-width="1"></circle>
+<circle cx="180" cy="250" fill="#06b6d4" r="3"></circle>
+</svg>
+</div>
+<!-- Top Map HUD Layer: Header & Toggles -->
+<div class="relative z-10 p-space-md flex flex-wrap items-center justify-between gap-space-md bg-surface-container/80 backdrop-blur-sm border-b border-outline-variant">
+<!-- Active Ticker Counter -->
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+<span class="text-label-md font-label-md text-on-surface">Global Telemetry Stream</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-space-xs">
+<span class="text-label-sm font-label-sm text-on-surface-variant">Active Assets Worldwide:</span>
+<span class="text-headline-sm font-telemetry-numeric text-primary font-bold tracking-tight">1,420</span>
+</div>
+</div>
+<!-- HUD Layer Toggles & Mode Selection -->
+<div class="flex items-center gap-space-xs bg-surface-container-lowest p-1 rounded-lg border border-outline-variant">
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm bg-surface-container-high text-primary border border-outline-variant flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="flight">flight</span> Air (312)
+            </button>
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="directions_boat">directions_boat</span> Ocean (148)
+            </button>
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span> Road (960)
+            </button>
+<div class="h-4 w-px bg-outline-variant mx-1"></div>
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="cloud">cloud</span> Weather
+            </button>
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="polyline">polyline</span> Geofences
+            </button>
+</div>
+</div>
+<!-- Telemetry Entity Markers (Overlay Nodes directly on Map) -->
+<div class="relative z-10 flex-1 w-full pointer-events-none">
+<!-- Node 1: Flight Over Atlantic (Air) -->
+<div class="absolute top-[26%] left-[34%] pointer-events-auto group cursor-pointer">
+<div class="flex items-center gap-1.5 bg-surface-container-high border border-primary-container px-2 py-1 rounded shadow-none">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="flight">flight</span>
+<span class="text-label-sm font-label-sm text-primary font-bold">FL-902</span>
+<span class="text-label-sm font-label-sm text-on-surface">On Time</span>
+</div>
+<!-- Marker Pin -->
+<div class="w-2 h-2 rounded-full bg-primary mx-auto -mt-0.5 animate-pulse"></div>
+</div>
+<!-- Node 2: Ground Asset (Chicago Area) -->
+<div class="absolute top-[38%] left-[19%] pointer-events-auto group cursor-pointer">
+<div class="flex items-center gap-1.5 bg-surface-container-high border border-outline-variant hover:border-primary px-2 py-1 rounded transition-colors">
+<span class="material-symbols-outlined text-tertiary text-sm" data-icon="local_shipping">local_shipping</span>
+<span class="text-label-sm font-label-sm text-on-surface font-semibold">TR-418</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Speed 62mph</span>
+</div>
+<div class="w-2 h-2 rounded-full bg-tertiary mx-auto -mt-0.5"></div>
+</div>
+<!-- Node 3: Ocean Vessel Entry (Rotterdam / North Sea) -->
+<div class="absolute top-[28%] left-[53%] pointer-events-auto group cursor-pointer">
+<div class="flex items-center gap-1.5 bg-surface-container-high border border-outline-variant hover:border-primary px-2 py-1 rounded transition-colors">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="directions_boat">directions_boat</span>
+<span class="text-label-sm font-label-sm text-secondary font-semibold">VS-104</span>
+<span class="text-label-sm font-label-sm text-on-surface">Port Berth Entry</span>
+</div>
+<div class="w-2 h-2 rounded-full bg-secondary mx-auto -mt-0.5"></div>
+</div>
+<!-- Hub Badges (Fixed Major Gateways) -->
+<div class="absolute top-[44%] left-[15%] pointer-events-none text-center">
+<span class="text-label-sm font-label-sm text-outline tracking-wider font-semibold uppercase">HUB // LOS ANGELES</span>
+</div>
+<div class="absolute top-[35%] left-[21%] pointer-events-none text-center">
+<span class="text-label-sm font-label-sm text-outline tracking-wider font-semibold uppercase">HUB // CHICAGO</span>
+</div>
+<div class="absolute top-[37%] left-[51%] pointer-events-none text-center">
+<span class="text-label-sm font-label-sm text-outline tracking-wider font-semibold uppercase">HUB // ROTTERDAM</span>
+</div>
+<div class="absolute top-[34%] left-[58%] pointer-events-none text-center">
+<span class="text-label-sm font-label-sm text-outline tracking-wider font-semibold uppercase">HUB // FRANKFURT</span>
+</div>
+<div class="absolute top-[64%] left-[81%] pointer-events-none text-center">
+<span class="text-label-sm font-label-sm text-outline tracking-wider font-semibold uppercase">HUB // SINGAPORE</span>
+</div>
+</div>
+<!-- Bottom Map HUD Controls & Mini Legend -->
+<div class="relative z-10 p-space-md flex items-center justify-between bg-surface-container/80 backdrop-blur-sm border-t border-outline-variant">
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-space-xs text-label-sm font-label-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-primary"></span> Air Priority
+            </div>
+<div class="flex items-center gap-space-xs text-label-sm font-label-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span> Maritime Bulk
+            </div>
+<div class="flex items-center gap-space-xs text-label-sm font-label-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span> Ground Freight
+            </div>
+<div class="flex items-center gap-space-xs text-label-sm font-label-sm text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-error"></span> Corridor Hold
+            </div>
+</div>
+<!-- Zoom HUD Controls -->
+<div class="flex items-center gap-1 bg-surface-container-lowest p-0.5 rounded border border-outline-variant">
+<button class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded" title="Zoom In">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded" title="Zoom Out">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded" title="Reset View">
+<span class="material-symbols-outlined" data-icon="filter_center_focus">filter_center_focus</span>
+</button>
+</div>
+</div>
+</section>
+<!-- QUICK STATS METRIC ROW: 4 High-Density Operational Panels -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Card 1: Revenue Today -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-space-md flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">REVENUE TODAY</span>
+<span class="material-symbols-outlined text-outline" data-icon="payments">payments</span>
+</div>
+<div class="my-space-sm">
+<div class="text-headline-md font-telemetry-numeric text-on-surface font-bold tracking-tight">$842,950.00</div>
+<div class="flex items-center gap-space-xs mt-1">
+<span class="text-label-sm font-label-sm text-primary font-semibold flex items-center">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span> +8.4%
+              </span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">vs daily target</span>
+</div>
+</div>
+<div class="pt-space-xs border-t border-outline-variant flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-on-surface-variant">Gross Margin</span>
+<span class="text-on-surface font-medium">22.4%</span>
+</div>
+</div>
+<!-- Card 2: Deliveries Completed vs Failed -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-space-md flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">DELIVERY FULFILLMENT</span>
+<span class="material-symbols-outlined text-outline" data-icon="task_alt">task_alt</span>
+</div>
+<div class="my-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="text-headline-md font-telemetry-numeric text-on-surface font-bold">1,842</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">/ 14 Failed</span>
+</div>
+<!-- Segmented Progress Bar -->
+<div class="w-full bg-surface-container-lowest h-2 rounded-full mt-2 overflow-hidden flex">
+<div class="bg-primary-container h-full rounded-l-full" style="width: 99.2%;"></div>
+<div class="bg-error h-full rounded-r-full" style="width: 0.8%;"></div>
+</div>
+</div>
+<div class="pt-space-xs border-t border-outline-variant flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-on-surface-variant">Success Rate</span>
+<span class="text-primary font-semibold">99.2%</span>
+</div>
+</div>
+<!-- Card 3: Active Drivers & Vehicles -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-space-md flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">ACTIVE FLEET ASSETS</span>
+<span class="material-symbols-outlined text-outline" data-icon="badge">badge</span>
+</div>
+<div class="my-space-sm">
+<div class="text-headline-md font-telemetry-numeric text-on-surface font-bold">444 Assets</div>
+<div class="flex items-center gap-space-sm mt-1 text-label-sm font-label-sm">
+<span class="text-primary font-medium">384 En Route</span>
+<span class="text-outline-variant">•</span>
+<span class="text-tertiary">42 Depot</span>
+</div>
+</div>
+<div class="pt-space-xs border-t border-outline-variant flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-on-surface-variant">Off Duty Standby</span>
+<span class="text-on-surface">18 Drivers</span>
+</div>
+</div>
+<!-- Card 4: Fleet Network Velocity -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-space-md flex flex-col justify-between hover:border-primary/50 transition-colors">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">NETWORK VELOCITY</span>
+<span class="material-symbols-outlined text-outline" data-icon="speed">speed</span>
+</div>
+<div class="my-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="text-headline-md font-telemetry-numeric text-on-surface font-bold">58.2</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">km/h avg</span>
+</div>
+<div class="flex items-center gap-space-xs mt-1 text-label-sm font-label-sm text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+              Corridor Flow Optimal
+            </div>
+</div>
+<div class="pt-space-xs border-t border-outline-variant flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-on-surface-variant">Fuel Efficiency Index</span>
+<span class="text-on-surface font-semibold">94.1%</span>
+</div>
+</div>
+</section>
+<!-- BOTTOM SECTION: Critical Alerts & Exceptions Queue -->
+<section class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden">
+<!-- Section Header & Filter Controls -->
+<div class="p-space-md border-b border-outline-variant flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Critical Alerts &amp; Exceptions Queue</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Autonomous telemetry violations, vehicle breakdowns, and route delays requiring manual triage.</p>
+</div>
+</div>
+<!-- Controls: Filter Pills, Search, and Batch Acknowledge -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<!-- Filter Pills -->
+<div class="flex items-center gap-space-xs bg-surface-container-lowest p-1 rounded-lg border border-outline-variant">
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm bg-surface-container-high text-primary border border-outline-variant font-medium">
+                All Exceptions (14)
+              </button>
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors">
+                Critical (4)
+              </button>
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors">
+                Vehicle Issues (3)
+              </button>
+<button class="px-space-sm py-1 rounded text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors">
+                Schedule Delays (7)
+              </button>
+</div>
+<!-- Batch Action Button -->
+<button class="h-8 px-space-md bg-surface-container-high hover:bg-surface-bright border border-outline-variant text-on-surface text-label-sm font-label-sm rounded flex items-center gap-space-xs transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="done_all">done_all</span>
+              Batch Acknowledge
+            </button>
+</div>
+</div>
+<!-- Exception Cards Triage Feed -->
+<div class="p-space-md space-y-space-sm">
+<!-- Alert 1: CRITICAL EXCEPTION (Pharma Cold Chain Breakdown) -->
+<div class="p-space-md rounded-lg bg-surface-container-low border border-error/50 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md hover:border-error transition-colors">
+<div class="flex items-start gap-space-md">
+<div class="w-8 h-8 rounded bg-error-container/30 border border-error flex items-center justify-center text-error flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="fmd_bad">fmd_bad</span>
+</div>
+<div class="space-y-1">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-error-container/20 text-error border border-error/40 font-bold uppercase tracking-wide">
+                    CRITICAL EXCEPTION
+                  </span>
+<span class="text-headline-sm font-headline-sm text-on-surface">Vehicle Breakdown: Truck TR-1092</span>
+<span class="text-body-sm font-body-sm text-outline-variant">•</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Interstate 80 Mile 142</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                  Diagnostic Alert: Severe Engine Overheat detected. <span class="text-error font-medium">Cargo: Pharma Cold Chain 4°C</span> at risk of temperature threshold breach in 38 minutes.
+                </p>
+</div>
+</div>
+<!-- Action Buttons for Alert 1 -->
+<div class="flex items-center gap-space-xs flex-shrink-0 self-end lg:self-center">
+<button class="h-8 px-space-sm rounded bg-surface-container-high border border-outline-variant text-label-sm font-label-sm text-on-surface hover:border-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="phone_in_talk">phone_in_talk</span>
+                Contact Driver
+              </button>
+<button class="h-8 px-space-md rounded bg-error hover:bg-opacity-90 text-on-error font-semibold text-label-sm font-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="emergency">emergency</span>
+                Dispatch Tow &amp; Transfer
+              </button>
+</div>
+</div>
+<!-- Alert 2: WARNING (Driver Delayed on I-95) -->
+<div class="p-space-md rounded-lg bg-surface-container-low border border-tertiary-container/50 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md hover:border-tertiary transition-colors">
+<div class="flex items-start gap-space-md">
+<div class="w-8 h-8 rounded bg-tertiary-container/20 border border-tertiary flex items-center justify-center text-tertiary flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+</div>
+<div class="space-y-1">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-container/20 text-tertiary border border-tertiary/40 font-bold uppercase tracking-wide">
+                    WARNING
+                  </span>
+<span class="text-headline-sm font-headline-sm text-on-surface">Driver Delayed (+45 min): Route NY-BOS #44</span>
+<span class="text-body-sm font-body-sm text-outline-variant">•</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Traffic Congestion I-95 North</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                  Major congestion near New Haven corridor. 12 timed enterprise delivery windows now marked as High Risk.
+                </p>
+</div>
+</div>
+<!-- Action Buttons for Alert 2 -->
+<div class="flex items-center gap-space-xs flex-shrink-0 self-end lg:self-center">
+<button class="h-8 px-space-sm rounded bg-surface-container-high border border-outline-variant text-label-sm font-label-sm text-on-surface hover:border-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="mail">mail</span>
+                Notify Receivers
+              </button>
+<button class="h-8 px-space-md rounded bg-primary-container hover:bg-primary text-on-primary font-semibold text-label-sm font-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="alt_route">alt_route</span>
+                Dynamic Re-optimize
+              </button>
+</div>
+</div>
+<!-- Alert 3: CRITICAL (Missed Delivery Window - Frankfurt Depot) -->
+<div class="p-space-md rounded-lg bg-surface-container-low border border-error/50 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md hover:border-error transition-colors">
+<div class="flex items-start gap-space-md">
+<div class="w-8 h-8 rounded bg-error-container/30 border border-error flex items-center justify-center text-error flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="cancel">cancel</span>
+</div>
+<div class="space-y-1">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-error-container/20 text-error border border-error/40 font-bold uppercase tracking-wide">
+                    CRITICAL
+                  </span>
+<span class="text-headline-sm font-headline-sm text-on-surface">Missed Delivery Window: Order SHP-99214-DE</span>
+<span class="text-body-sm font-body-sm text-outline-variant">•</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Frankfurt Depot Cargo Hub</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                  Consignee receiving dock closed at 14:00 CET without signature handover. Container staged in temporary bay 14.
+                </p>
+</div>
+</div>
+<!-- Action Buttons for Alert 3 -->
+<div class="flex items-center gap-space-xs flex-shrink-0 self-end lg:self-center">
+<button class="h-8 px-space-sm rounded bg-surface-container-high border border-outline-variant text-label-sm font-label-sm text-on-surface hover:border-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+                Log Deviation
+              </button>
+<button class="h-8 px-space-md rounded bg-secondary-container hover:bg-opacity-90 text-on-surface font-semibold text-label-sm font-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="event_repeat">event_repeat</span>
+                Reschedule Next Shift
+              </button>
+</div>
+</div>
+<!-- Alert 4: WARNING (Geofence Deviation) -->
+<div class="p-space-md rounded-lg bg-surface-container-low border border-tertiary-container/50 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md hover:border-tertiary transition-colors">
+<div class="flex items-start gap-space-md">
+<div class="w-8 h-8 rounded bg-tertiary-container/20 border border-tertiary flex items-center justify-center text-tertiary flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="wrong_location">wrong_location</span>
+</div>
+<div class="space-y-1">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-container/20 text-tertiary border border-tertiary/40 font-bold uppercase tracking-wide">
+                    WARNING
+                  </span>
+<span class="text-headline-sm font-headline-sm text-on-surface">Geofence Deviation: Van VN-304</span>
+<span class="text-body-sm font-body-sm text-outline-variant">•</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Sector 7B Perimeter Breach</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                  Vehicle exited designated delivery corridor without authorized manifest override. Telemetry heartbeats active.
+                </p>
+</div>
+</div>
+<!-- Action Buttons for Alert 4 -->
+<div class="flex items-center gap-space-xs flex-shrink-0 self-end lg:self-center">
+<button class="h-8 px-space-sm rounded bg-surface-container-high border border-outline-variant text-label-sm font-label-sm text-on-surface hover:border-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="map">map</span>
+                Review Route
+              </button>
+<button class="h-8 px-space-md rounded bg-surface-container-high border border-outline-variant hover:border-primary text-primary font-semibold text-label-sm font-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="sensors">sensors</span>
+                Ping Driver
+              </button>
+</div>
+</div>
+</div>
+<!-- Queue Summary Footer -->
+<div class="px-space-md py-space-sm bg-surface-container-lowest border-t border-outline-variant flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<div class="flex items-center gap-space-sm">
+<span>Showing 4 of 14 active telemetry exceptions</span>
+<span>•</span>
+<span class="text-primary font-medium">Automatic SLA auto-escalation active (15m window)</span>
+</div>
+<button class="text-primary hover:underline flex items-center gap-0.5">
+            View All Exception Logs <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</section>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ORBITAL LOGISTICS - Route Planning &amp; Dispatch Engine</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Sora:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary": "#003640",
+            "error": "#ffb4ab",
+            "inverse-on-surface": "#283044",
+            "on-error-container": "#ffdad6",
+            "surface": "#0b1326",
+            "on-tertiary-fixed-variant": "#6a3b00",
+            "tertiary-container": "#e89337",
+            "outline-variant": "#3d494c",
+            "error-container": "#93000a",
+            "surface-container-low": "#131b2e",
+            "surface-container-highest": "#2d3449",
+            "surface-dim": "#0b1326",
+            "on-secondary-fixed": "#001550",
+            "on-primary-fixed": "#001f26",
+            "inverse-primary": "#00687a",
+            "on-secondary": "#002780",
+            "tertiary": "#ffb873",
+            "outline": "#869397",
+            "surface-tint": "#4cd7f6",
+            "secondary": "#b6c4ff",
+            "surface-container-high": "#222a3d",
+            "tertiary-fixed-dim": "#ffb873",
+            "surface-container": "#171f33",
+            "on-secondary-fixed-variant": "#0039b3",
+            "inverse-surface": "#dae2fd",
+            "on-error": "#690005",
+            "primary": "#4cd7f6",
+            "on-tertiary-container": "#5b3200",
+            "secondary-container": "#004fef",
+            "secondary-fixed": "#dce1ff",
+            "on-surface": "#dae2fd",
+            "on-surface-variant": "#bcc9cd",
+            "background": "#0b1326",
+            "on-primary-container": "#00424f",
+            "secondary-fixed-dim": "#b6c4ff",
+            "on-background": "#dae2fd",
+            "primary-fixed-dim": "#4cd7f6",
+            "surface-variant": "#2d3449",
+            "on-tertiary-fixed": "#2d1600",
+            "on-primary-fixed-variant": "#004e5c",
+            "on-tertiary": "#4b2800",
+            "primary-container": "#06b6d4",
+            "surface-bright": "#31394d",
+            "primary-fixed": "#acedff",
+            "tertiary-fixed": "#ffdcbf",
+            "on-secondary-container": "#d4dbff",
+            "surface-container-lowest": "#060e20"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-lg": "2rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "gutter": "1rem",
+            "space-xl": "2rem",
+            "margin": "1rem",
+            "gutter-lg": "1.5rem",
+            "space-lg": "1.5rem",
+            "margin-md": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Sora"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Sora"],
+            "headline-md": ["Sora"],
+            "telemetry-numeric": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "display": ["Sora"],
+            "headline-lg": ["Sora"],
+            "body-sm": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "600" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "telemetry-numeric": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "display": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #131b2e;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #3d494c;
+      border-radius: 2px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #4cd7f6;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex selection:bg-primary selection:text-on-primary">
+<!-- SHARED COMPONENT: SideNavBar (Strict implementation from JSON Anchor) -->
+<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col justify-between z-40 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant dark:border-outline-variant">
+<div class="flex flex-col">
+<!-- Header / Brand -->
+<div class="p-space-md border-b border-outline-variant dark:border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<div>
+<div class="text-headline-sm font-headline-sm text-primary dark:text-primary uppercase tracking-widest leading-none">ORBITAL</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">FLEET TELEMETRY OS</div>
+</div>
+</div>
+</div>
+<!-- Dispatch Command Avatar Block -->
+<div class="px-space-md py-space-sm mx-space-sm mt-space-sm bg-surface-container rounded-xl border border-outline-variant/40 flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center font-headline-sm text-label-md font-bold">
+          D1
+        </div>
+<div class="min-w-0 flex-1">
+<p class="text-label-md font-label-md text-on-surface font-medium truncate">Dispatcher One</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant truncate">Global Fleet Control #402</p>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+</div>
+<!-- Primary Navigation Links -->
+<nav class="mt-space-md px-space-xs space-y-1">
+<!-- Command Center -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container hover:text-on-surface dark:hover:text-on-surface rounded-lg transition-colors duration-150" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Command Center</span>
+</a>
+<!-- Order Management -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container hover:text-on-surface dark:hover:text-on-surface rounded-lg transition-colors duration-150" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-label-md font-label-md">Order Management</span>
+</a>
+<!-- Fleet Telemetry -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container hover:text-on-surface dark:hover:text-on-surface rounded-lg transition-colors duration-150" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-label-md font-label-md">Fleet Telemetry</span>
+</a>
+<!-- Route Planning (ACTIVE TAB based on intent) -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-primary dark:text-primary bg-surface-container-high dark:bg-surface-container-high border-l-2 border-primary dark:border-primary font-medium rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-primary">alt_route</span>
+<span class="text-label-md font-label-md">Route Planning</span>
+<span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-primary-container/20 text-primary border border-primary-container/40">ACTIVE</span>
+</a>
+<!-- Global Analytics -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container hover:text-on-surface dark:hover:text-on-surface rounded-lg transition-colors duration-150" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="text-label-md font-label-md">Global Analytics</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container hover:text-on-surface dark:hover:text-on-surface rounded-lg transition-colors duration-150" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</nav>
+<!-- Sidebar CTA -->
+<div class="px-space-md mt-space-md">
+<button class="w-full flex items-center justify-center gap-space-xs py-space-sm px-space-md rounded-xl bg-error-container/40 border border-error/30 text-error hover:bg-error-container/70 active:scale-[0.98] transition-all text-label-md font-label-md font-semibold">
+<span class="material-symbols-outlined">warning</span>
+<span>Broadcast Alert</span>
+</button>
+</div>
+</div>
+<!-- SideNav Footer -->
+<div class="p-space-md border-t border-outline-variant dark:border-outline-variant space-y-1">
+<a class="flex items-center gap-space-sm px-space-sm py-1.5 text-on-surface-variant text-label-sm font-label-sm hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">radar</span>
+<span>System Status</span>
+<span class="ml-auto w-1.5 h-1.5 rounded-full bg-primary"></span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-1.5 text-on-surface-variant text-label-sm font-label-sm hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span>Documentation</span>
+</a>
+</div>
+</aside>
+<!-- Main Viewport Layout Canvas -->
+<div class="pl-64 flex-1 flex flex-col min-h-screen">
+<!-- SHARED COMPONENT: TopNavBar (Exact JSON Implementation) -->
+<header class="flex justify-between items-center h-16 w-full px-space-lg bg-surface-container dark:bg-surface-container border-b border-outline-variant dark:border-outline-variant sticky top-0 z-30">
+<div class="flex items-center gap-space-lg flex-1">
+<span class="text-headline-sm font-headline-sm font-semibold tracking-wider text-primary dark:text-primary whitespace-nowrap">ORBITAL LOGISTICS</span>
+<!-- Search Bar on Left as per JSON spec -->
+<div class="relative w-80 max-w-sm hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">search</span>
+<input class="w-full bg-surface-container-low text-on-surface text-body-sm font-body-sm pl-9 pr-3 py-1.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-0 focus:outline-none placeholder-on-surface-variant/50 transition-colors" placeholder="Search manifest, cargo, waypoint, vehicle..." type="text"/>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden lg:flex items-center space-x-space-md text-label-md font-label-md">
+<a class="text-primary dark:text-primary border-b-2 border-primary dark:border-primary font-medium py-5" href="#">Network Operations</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface py-5" href="#">Carrier Hub</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface py-5" href="#">Manifest Direct</a>
+</nav>
+</div>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-1 border-r border-outline-variant pr-space-sm mr-space-xs text-on-surface-variant">
+<button class="p-2 rounded-lg hover:bg-surface-container-high hover:text-primary active:scale-[0.98] transition-colors" title="Notifications">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-high hover:text-primary active:scale-[0.98] transition-colors" title="Sensors">
+<span class="material-symbols-outlined">sensors</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-high hover:text-primary active:scale-[0.98] transition-colors" title="Help">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<button class="px-space-md py-2 rounded-xl bg-error-container/30 border border-error/40 text-error hover:bg-error-container/50 text-label-md font-label-md font-semibold transition-all active:scale-[0.98]">
+          Emergency Hold
+        </button>
+<button class="px-space-md py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-semibold text-label-md font-label-md transition-all active:scale-[0.98] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">add_task</span>
+<span>New Dispatch</span>
+</button>
+<div class="ml-space-sm pl-space-sm border-l border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant overflow-hidden flex items-center justify-center text-on-surface-variant text-label-sm" title="Dispatcher Operations Officer Avatar">
+            DO
+          </div>
+</div>
+</div>
+</header>
+<!-- CONTENT BODY: Route Planning & Dispatch Engine Canvas -->
+<main class="p-space-lg flex-1 flex flex-col gap-space-lg overflow-x-hidden">
+<!-- SECTION 1: Engine Header & AI Batch Operations -->
+<section class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-surface-container-low border border-outline-variant/60 rounded-xl p-space-md">
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-headline-md font-headline-md text-white tracking-tight">Route Planning &amp; Dispatch Engine</h1>
+<span class="px-2 py-0.5 rounded-full bg-primary-container/10 border border-primary-container/30 text-primary text-label-sm font-label-sm">v4.18 Real-time Solvers</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Autonomous spatial route clustering, time-window allocation, and dynamic fleet load balancing.</p>
+</div>
+<!-- Action Control Group -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="px-space-md py-2 rounded-xl bg-surface-container-high border border-outline-variant text-on-surface hover:border-primary hover:text-primary active:scale-[0.98] transition-all text-label-md font-label-md flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">history_toggle_off</span>
+<span>Simulate Delays</span>
+</button>
+<button class="px-space-md py-2 rounded-xl bg-secondary-container hover:bg-secondary-container/80 text-white font-medium active:scale-[0.98] transition-all text-label-md font-label-md flex items-center gap-2 border border-secondary/30">
+<span class="material-symbols-outlined">send</span>
+<span>Publish Dispatches</span>
+</button>
+<button class="px-space-lg py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-bold active:scale-[0.98] transition-all text-label-md font-label-md flex items-center gap-2">
+<span class="material-symbols-outlined">auto_fix_high</span>
+<span>Auto-Optimize All Routes (AI)</span>
+</button>
+</div>
+</section>
+<!-- SECTION 2: Upper Split Screen (1/3 Order Pool vs 2/3 Tactical GIS Map) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-stretch">
+<!-- Left Panel: Unassigned Order Pool (1/3 approx 4 cols on desktop) -->
+<div class="lg:col-span-4 bg-surface-container rounded-xl border border-outline-variant/60 flex flex-col h-[580px]">
+<!-- Pool Header -->
+<div class="p-space-md border-b border-outline-variant flex items-center justify-between bg-surface-container-low rounded-t-xl">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">move_to_inbox</span>
+<h2 class="text-headline-sm font-headline-sm text-white">Unassigned Order Pool</h2>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-tertiary-container/20 border border-tertiary/30 text-tertiary text-label-sm font-label-sm font-semibold">
+              18 Orders Pending
+            </span>
+</div>
+<!-- Search & Filter Controls -->
+<div class="p-space-sm border-b border-outline-variant space-y-2 bg-surface-container-high/40">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">filter_list</span>
+<input class="w-full bg-surface-container-lowest text-on-surface text-body-sm font-body-sm pl-8 pr-2 py-1 rounded border border-outline-variant focus:border-primary focus:outline-none" placeholder="Filter order ID, hub or zone..." type="text"/>
+</div>
+<!-- Filter Chips Row -->
+<div class="flex flex-wrap gap-1.5 text-label-sm font-label-sm">
+<select class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded px-2 py-0.5 text-label-sm focus:border-primary focus:outline-none">
+<option>All Zones</option>
+<option>Metro North</option>
+<option>South Bay</option>
+<option>East River</option>
+</select>
+<select class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded px-2 py-0.5 text-label-sm focus:border-primary focus:outline-none">
+<option>All Priorities</option>
+<option>Urgent</option>
+<option>Standard</option>
+</select>
+<select class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded px-2 py-0.5 text-label-sm focus:border-primary focus:outline-none">
+<option>All Cargo</option>
+<option>Cold Chain</option>
+<option>Hazardous</option>
+<option>Palletized</option>
+</select>
+</div>
+</div>
+<!-- Order Cards Scrollable List -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-space-sm space-y-space-sm">
+<!-- Card 1: ORD-4081 -->
+<div class="p-space-sm bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-outline-variant hover:border-primary/60 transition-all cursor-grab active:cursor-grabbing group">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline group-hover:text-primary cursor-grab">drag_indicator</span>
+<span class="font-bold text-white text-body-md">ORD-4081</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant font-mono">280 kg</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-primary-container/10 border border-primary/30 text-primary text-label-sm font-label-sm font-medium">Expedited</span>
+</div>
+<div class="space-y-1 text-body-sm font-body-sm pl-6">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="truncate">Newark Airport Hub → Midtown Manhattan</span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm">
+<span class="text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">ac_unit</span> Cold Chain
+                  </span>
+<span class="text-outline">•</span>
+<span class="text-tertiary">4hr Window</span>
+</div>
+</div>
+</div>
+<!-- Card 2: ORD-4099 -->
+<div class="p-space-sm bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-outline-variant hover:border-primary/60 transition-all cursor-grab active:cursor-grabbing group">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline group-hover:text-primary cursor-grab">drag_indicator</span>
+<span class="font-bold text-white text-body-md">ORD-4099</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant font-mono">1,200 kg</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-variant border border-outline-variant text-on-surface-variant text-label-sm font-label-sm">Standard</span>
+</div>
+<div class="space-y-1 text-body-sm font-body-sm pl-6">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="truncate">Jersey City Port → Brooklyn Terminal</span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+<span>General Freight</span>
+<span class="text-outline">•</span>
+<span>4 Pallets</span>
+</div>
+</div>
+</div>
+<!-- Card 3: ORD-4112 -->
+<div class="p-space-sm bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-outline-variant hover:border-primary/60 transition-all cursor-grab active:cursor-grabbing group">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline group-hover:text-primary cursor-grab">drag_indicator</span>
+<span class="font-bold text-white text-body-md">ORD-4112</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant font-mono">85 kg</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-error-container/20 border border-error/30 text-error text-label-sm font-label-sm font-semibold">Urgent</span>
+</div>
+<div class="space-y-1 text-body-sm font-body-sm pl-6">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span class="truncate">Queens Fulfillment → Financial District</span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+<span class="text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">verified</span> High-value Tech Components
+                  </span>
+</div>
+</div>
+</div>
+<!-- Card 4: ORD-4125 -->
+<div class="p-space-sm bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-outline-variant hover:border-primary/60 transition-all cursor-grab active:cursor-grabbing group">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline group-hover:text-primary cursor-grab">drag_indicator</span>
+<span class="font-bold text-white text-body-md">ORD-4125</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant font-mono">450 kg</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-variant border border-outline-variant text-on-surface-variant text-label-sm font-label-sm">Standard</span>
+</div>
+<div class="space-y-1 text-body-sm font-body-sm pl-6">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="truncate">Secaucus Rail Yard → Bronx Distribution</span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+<span>Cross-dock Payload</span>
+<span class="text-outline">•</span>
+<span>Standard Palletized</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Summary Bar -->
+<div class="p-space-sm border-t border-outline-variant bg-surface-container-low rounded-b-xl flex items-center justify-between text-label-md font-label-md">
+<span class="text-on-surface-variant">4 Selected • <strong class="text-white">2,015 kg</strong> Total Payload</span>
+<button class="text-primary hover:underline flex items-center gap-1 text-label-sm font-label-sm">
+<span>Select All (18)</span>
+</button>
+</div>
+</div>
+<!-- Right Panel: Tactical GIS Route Optimization Map (2/3 approx 8 cols) -->
+<div class="lg:col-span-8 bg-surface-container rounded-xl border border-outline-variant/60 relative overflow-hidden flex flex-col h-[580px]">
+<!-- Map Canvas Header & Floating Controls -->
+<div class="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+<!-- Title & Cluster Badges -->
+<div class="bg-surface-container-low/90 backdrop-blur-md border border-outline-variant px-3 py-2 rounded-xl pointer-events-auto flex items-center gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">public</span>
+<span class="font-headline-sm text-headline-sm text-white">Route Optimization Map</span>
+</div>
+<div class="hidden xl:flex items-center gap-2 text-label-sm font-label-sm border-l border-outline-variant pl-3">
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">Zone Alpha: Metro Central</span>
+<span class="px-2 py-0.5 rounded bg-secondary/10 text-secondary border border-secondary/20">Zone Beta: Outer Boroughs</span>
+<span class="px-2 py-0.5 rounded bg-tertiary/10 text-tertiary border border-tertiary/20">Zone Gamma: Port Corridor</span>
+</div>
+</div>
+<!-- Floating Map Toolbar -->
+<div class="bg-surface-container-low/90 backdrop-blur-md border border-outline-variant p-1.5 rounded-xl pointer-events-auto flex items-center gap-1.5 text-label-sm font-label-sm">
+<button class="px-2.5 py-1 rounded bg-surface-container-high text-primary border border-primary/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">scatter_plot</span>
+<span>Clusters</span>
+</button>
+<button class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">traffic</span>
+<span>Traffic</span>
+</button>
+<button class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">layers</span>
+<span>Dark Sat</span>
+</button>
+</div>
+</div>
+<!-- Synthetic High-Precision Dark GIS Routing Simulation Surface -->
+<div class="flex-1 w-full h-full bg-[#091122] relative overflow-hidden select-none">
+<!-- Grid Matrix Coordinate Overlay -->
+<svg class="w-full h-full absolute inset-0 opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern height="40" id="grid" patternunits="userSpaceOnUse" width="40">
+<path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3d494c" stroke-width="0.75"></path>
+</pattern>
+</defs>
+<rect fill="url(#grid)" height="100%" width="100%"></rect>
+</svg>
+<!-- Vector Transit Paths & Iso-Corridors -->
+<svg class="w-full h-full absolute inset-0 pointer-events-none" fill="none" viewbox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+<!-- Geometric Land / Harbor Outlines -->
+<path d="M 120 40 Q 220 180 190 320 T 310 480" opacity="0.6" stroke="#1e293b" stroke-linecap="round" stroke-width="40"></path>
+<path d="M 450 20 Q 480 150 580 260 T 700 450" opacity="0.4" stroke="#1e293b" stroke-linecap="round" stroke-width="60"></path>
+<!-- Planned Route Polyline A (Truck TR-402 Route) -->
+<path d="M 160 210 L 260 140 L 370 190 L 490 130" opacity="0.9" stroke="#06B6D4" stroke-dasharray="4 3" stroke-width="2.5"></path>
+<!-- Planned Route Polyline B (Van VN-108 Route) -->
+<path d="M 190 350 L 310 320 L 440 370" opacity="0.8" stroke="#2861FF" stroke-dasharray="3 3" stroke-width="2"></path>
+<!-- Planned Route Polyline C (Truck TR-510 Freight Corridors) -->
+<path d="M 160 210 L 230 290 L 380 270 L 610 240 L 690 180" opacity="0.85" stroke="#FFB873" stroke-width="2"></path>
+<!-- Waypoint Stop #1 (Newark Hub) -->
+<circle cx="160" cy="210" fill="#131B2E" r="14" stroke="#06B6D4" stroke-width="2"></circle>
+<text fill="#06B6D4" font-family="Inter" font-size="11" font-weight="700" text-anchor="middle" x="160" y="214">#1</text>
+<!-- Waypoint Stop #2 (Midtown Deliveries) -->
+<circle cx="260" cy="140" fill="#131B2E" r="14" stroke="#06B6D4" stroke-width="2"></circle>
+<text fill="#06B6D4" font-family="Inter" font-size="11" font-weight="700" text-anchor="middle" x="260" y="144">#2</text>
+<!-- Waypoint Stop #3 (Queens Cross-Dock) -->
+<circle cx="370" cy="190" fill="#131B2E" r="14" stroke="#06B6D4" stroke-width="2"></circle>
+<text fill="#06B6D4" font-family="Inter" font-size="11" font-weight="700" text-anchor="middle" x="370" y="194">#3</text>
+<!-- Waypoint Stop #4 (Brooklyn Terminal) -->
+<circle cx="490" cy="130" fill="#131B2E" r="14" stroke="#06B6D4" stroke-width="2"></circle>
+<text fill="#06B6D4" font-family="Inter" font-size="11" font-weight="700" text-anchor="middle" x="490" y="134">#4</text>
+<!-- Fleet Position Live Indicator (TR-402) -->
+<circle cx="210" cy="175" fill="#4CD7F6" r="5"></circle>
+<circle cx="210" cy="175" opacity="0.6" r="10" stroke="#4CD7F6" stroke-width="1"></circle>
+<!-- Fleet Position Live Indicator (VN-108) -->
+<circle cx="250" cy="335" fill="#2861FF" r="5"></circle>
+<!-- Fleet Position Live Indicator (TR-510) -->
+<circle cx="495" cy="255" fill="#FFB873" r="5"></circle>
+</svg>
+<!-- Interactive HUD Pins Rendered in Flat HTML for Crisp Legibility -->
+<div class="absolute top-[32%] left-[18%] transform -translate-x-1/2 -translate-y-full flex flex-col items-center group cursor-pointer pointer-events-auto">
+<div class="bg-surface-container-high border border-primary text-white text-[11px] px-2 py-0.5 rounded shadow-none whitespace-nowrap mb-1">
+                Hub NJ-10 <span class="text-primary font-mono font-bold">(Origin)</span>
+</div>
+<div class="w-3 h-3 bg-primary rotate-45 border border-white"></div>
+</div>
+<div class="absolute top-[21%] left-[32%] transform -translate-x-1/2 -translate-y-full flex flex-col items-center group cursor-pointer pointer-events-auto">
+<div class="bg-surface-container-high border border-outline-variant text-white text-[11px] px-2 py-0.5 rounded shadow-none whitespace-nowrap mb-1">
+                Drop ORD-4081 <span class="text-tertiary font-mono">11:15 AM</span>
+</div>
+<div class="w-3 h-3 bg-primary-container rotate-45 border border-white"></div>
+</div>
+<!-- Geographic Cluster Indicators -->
+<div class="absolute bottom-16 left-8 bg-surface-container-low/90 backdrop-blur border border-outline-variant p-2 rounded-lg text-body-sm">
+<div class="flex items-center gap-2 mb-1">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+<span class="text-label-sm font-label-sm text-white uppercase font-semibold">Active Telemetry Solver</span>
+</div>
+<div class="text-[11px] font-mono text-on-surface-variant space-y-0.5">
+<div>SOLVER: AntColony-V3 • LATENCY: 28ms</div>
+<div>CLUSTER PURITY: 94.2% • FEASIBLE: YES</div>
+</div>
+</div>
+<!-- Floating Mileage & Cost Calculator Badge (Exact Spec) -->
+<div class="absolute bottom-4 right-4 bg-surface-container-low/95 border border-outline-variant/80 rounded-xl px-4 py-2.5 flex items-center gap-4 text-body-sm font-body-sm shadow-none pointer-events-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<div class="text-left">
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase">Aggregated Route Cost</div>
+<div class="font-headline-sm text-headline-sm text-white font-mono">
+                    Est. Total Distance: <span class="text-primary font-bold">342 km</span> • Fuel: <span class="text-tertiary font-bold">$184.20</span>
+</div>
+</div>
+</div>
+<button class="bg-surface-container-high hover:bg-surface-container-highest px-3 py-1.5 rounded-lg border border-outline-variant text-label-sm font-label-sm text-on-surface flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[15px]">tune</span>
+<span>Tolls &amp; Fuel Rules</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: Drag-and-Drop Assignment UI & Dispatch Gantt / Timeline -->
+<section class="bg-surface-container rounded-xl border border-outline-variant/60 p-space-md flex flex-col gap-space-md">
+<!-- Gantt Header & Controls -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm border-b border-outline-variant pb-space-sm">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-white">Active Driver Assignment Lanes</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Drag unassigned order tokens directly into empty driver blocks to schedule dynamic waypoint dispatches.</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface text-label-md font-label-md flex items-center gap-1.5 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-primary text-[17px]">balance</span>
+<span>Auto-Balance Workload</span>
+</button>
+<button class="px-space-md py-1.5 rounded-xl bg-secondary-container hover:bg-secondary-container/80 border border-secondary/30 text-white text-label-md font-label-md flex items-center gap-1.5 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[17px]">phonelink_ring</span>
+<span>Notify Selected Drivers via Mobile App</span>
+</button>
+</div>
+</div>
+<!-- Gantt Time Axis Ruler (08:00 - 18:00) -->
+<div class="grid grid-cols-12 gap-1 px-4 text-label-sm font-label-sm text-on-surface-variant font-mono border-b border-outline-variant/40 pb-1.5">
+<div class="col-span-3 text-left">DRIVER PROFILE &amp; VEHICLE</div>
+<div class="col-span-9 grid grid-cols-10 text-center">
+<span>08:00</span>
+<span>09:00</span>
+<span>10:00</span>
+<span>11:00</span>
+<span>12:00</span>
+<span>13:00</span>
+<span>14:00</span>
+<span>15:00</span>
+<span>16:00</span>
+<span>17:00</span>
+</div>
+</div>
+<!-- Driver Horizontal Lanes Container -->
+<div class="space-y-space-sm">
+<!-- LANE 1: Driver Marcus Vance -->
+<div class="grid grid-cols-12 gap-2 bg-surface-container-low p-space-sm rounded-xl border border-outline-variant hover:border-outline transition-colors items-center">
+<!-- Left Info Block -->
+<div class="col-span-3 border-r border-outline-variant/50 pr-2">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white text-body-md truncate">Marcus Vance</span>
+<span class="text-label-sm font-label-sm text-primary font-mono">TR-402</span>
+</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant truncate">5 Ton Box Truck</div>
+<div class="mt-1 flex items-center justify-between text-[11px] font-mono">
+<span class="text-on-surface">Cap: <strong class="text-primary">4/6 (68%)</strong></span>
+<span class="text-on-surface-variant">Hours: 4.2 / 8.0</span>
+</div>
+<!-- Mini Progress Bar -->
+<div class="w-full h-1 bg-surface-container-highest rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 68%;"></div>
+</div>
+</div>
+<!-- Visual Horizontal Timeline Slots (Right 9 Columns) -->
+<div class="col-span-9 grid grid-cols-10 gap-1.5 py-1 items-center">
+<!-- Slot 08:30 - ORD-3901 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm hover:border-primary transition-colors cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3901</span>
+<span class="text-[10px] text-primary">08:30</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">Jersey City Hub</div>
+</div>
+<!-- Slot 10:15 - ORD-3914 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm hover:border-primary transition-colors cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3914</span>
+<span class="text-[10px] text-primary">10:15</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">SoHo Distribution</div>
+</div>
+<!-- Slot 12:00 LUNCH BREAK -->
+<div class="col-span-1 bg-surface-container-lowest/60 border border-dashed border-outline-variant rounded p-1 text-center flex flex-col justify-center items-center">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">restaurant</span>
+<span class="text-[9px] font-mono text-on-surface-variant uppercase">Lunch</span>
+</div>
+<!-- Slot 13:30 - ORD-3920 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm hover:border-primary transition-colors cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3920</span>
+<span class="text-[10px] text-primary">13:30</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">Midtown Depot</div>
+</div>
+<!-- Drop Zone: Drag Unassigned Order Here (Dotted Cyan outline) -->
+<div class="col-span-3 border-2 border-dashed border-primary/50 bg-primary/5 hover:bg-primary/10 rounded p-2 text-center flex items-center justify-center gap-1.5 cursor-pointer transition-colors group">
+<span class="material-symbols-outlined text-primary text-[16px] group-hover:scale-110 transition-transform">add_circle</span>
+<span class="text-label-sm font-label-sm text-primary font-medium">DROP ZONE: Drag Unassigned Order Here</span>
+</div>
+</div>
+</div>
+<!-- LANE 2: Driver Sarah Jenkins -->
+<div class="grid grid-cols-12 gap-2 bg-surface-container-low p-space-sm rounded-xl border border-outline-variant hover:border-outline transition-colors items-center">
+<!-- Left Info Block -->
+<div class="col-span-3 border-r border-outline-variant/50 pr-2">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white text-body-md truncate">Sarah Jenkins</span>
+<span class="text-label-sm font-label-sm text-primary font-mono">VN-108</span>
+</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant truncate">High Roof Sprinter</div>
+<div class="mt-1 flex items-center justify-between text-[11px] font-mono">
+<span class="text-on-surface">Cap: <strong class="text-secondary">2/5 (40%)</strong></span>
+<span class="text-on-surface-variant">Hours: 2.5 / 8.0</span>
+</div>
+<!-- Mini Progress Bar -->
+<div class="w-full h-1 bg-surface-container-highest rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-secondary" style="width: 40%;"></div>
+</div>
+</div>
+<!-- Visual Horizontal Timeline Slots (Right 9 Columns) -->
+<div class="col-span-9 grid grid-cols-10 gap-1.5 py-1 items-center">
+<!-- Slot 09:00 - ORD-3882 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm hover:border-primary transition-colors cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3882</span>
+<span class="text-[10px] text-secondary">09:00</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">Queens Center</div>
+</div>
+<!-- Slot 11:00 - ORD-3890 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm hover:border-primary transition-colors cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3890</span>
+<span class="text-[10px] text-secondary">11:00</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">Long Island Wharf</div>
+</div>
+<!-- Empty Slot 1 (Dotted Cyan Outline) -->
+<div class="col-span-3 border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 rounded p-2 text-center flex items-center justify-center gap-1 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-primary text-[16px]">add</span>
+<span class="text-label-sm font-label-sm text-primary">DROP ZONE: Empty Slot</span>
+</div>
+<!-- Empty Slot 2 (Dotted Cyan Outline) -->
+<div class="col-span-3 border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 rounded p-2 text-center flex items-center justify-center gap-1 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-primary text-[16px]">add</span>
+<span class="text-label-sm font-label-sm text-primary">DROP ZONE: Empty Slot</span>
+</div>
+</div>
+</div>
+<!-- LANE 3: Driver David Kalu (Near Limit / Packed) -->
+<div class="grid grid-cols-12 gap-2 bg-surface-container-low p-space-sm rounded-xl border border-outline-variant hover:border-outline transition-colors items-center">
+<!-- Left Info Block -->
+<div class="col-span-3 border-r border-outline-variant/50 pr-2">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white text-body-md truncate">David Kalu</span>
+<span class="text-label-sm font-label-sm text-tertiary font-mono">TR-510</span>
+</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant truncate">10 Ton Freight Rig</div>
+<div class="mt-1 flex items-center justify-between text-[11px] font-mono">
+<span class="text-error font-bold">5/5 Cap (95% LOAD)</span>
+<span class="text-on-surface-variant">Hours: 6.8 / 8.0</span>
+</div>
+<!-- Mini Progress Bar Near Limit -->
+<div class="w-full h-1 bg-surface-container-highest rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-error" style="width: 95%;"></div>
+</div>
+</div>
+<!-- Visual Horizontal Timeline Slots (5 Packed Slots) -->
+<div class="col-span-9 grid grid-cols-10 gap-1.5 py-1 items-center">
+<!-- Slot 1: ORD-3801 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3801</span>
+<span class="text-[10px] text-tertiary">08:00</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">Bronx Yard</div>
+</div>
+<!-- Slot 2: ORD-3810 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3810</span>
+<span class="text-[10px] text-tertiary">09:45</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">Harlem Terminal</div>
+</div>
+<!-- Slot 3: ORD-3833 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3833</span>
+<span class="text-[10px] text-tertiary">11:30</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">LaGuardia Cargo</div>
+</div>
+<!-- Slot 4: ORD-3849 -->
+<div class="col-span-2 bg-surface-container-high border border-outline-variant rounded p-1.5 text-label-sm">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3849</span>
+<span class="text-[10px] text-tertiary">14:00</span>
+</div>
+<div class="text-[10px] text-on-surface-variant truncate">Astoria Pier</div>
+</div>
+<!-- Slot 5: ORD-3855 + Locked Badge -->
+<div class="col-span-2 bg-surface-container-high border border-error/50 rounded p-1.5 text-label-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-bold text-white font-mono">ORD-3855</span>
+<span class="text-[10px] text-error font-bold">16:00</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-error font-semibold mt-0.5">
+<span class="material-symbols-outlined text-[11px]">lock</span>
+<span>LANE LOCKED</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>
