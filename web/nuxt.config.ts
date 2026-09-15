@@ -24,6 +24,7 @@ export default defineNuxtConfig({
       adminSubdomain: 'admin',
       apiBase: 'https://api.logistics.shenodev.tech',
       siteUrl: 'https://logistics.shenodev.tech',
+      stripePk: '',
     },
   },
   vite: {
