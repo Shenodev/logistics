@@ -1,5 +1,11 @@
 import type { FetchError } from 'ofetch'
-import { type LoginCredentials, type LoginResponse, type LogoutResponse, type SessionUser } from '~~/shared/auth'
+import {
+  type LoginCredentials,
+  type LoginResponse,
+  type LogoutResponse,
+  type SessionUser,
+  type SignupCredentials,
+} from '~~/shared/auth'
 
 export type AuthStatus = 'idle' | 'pending' | 'authenticated' | 'unauthenticated'
 
@@ -57,6 +63,25 @@ export const useAuthStore = defineStore('auth', {
 
       try {
         const { user } = await authRequest<LoginResponse>('/auth/login', {
+          method: 'POST',
+          body: credentials,
+        })
+        this.setSession(user)
+        return user
+      }
+      catch (error) {
+        this.status = 'unauthenticated'
+        this.loginError = getAuthErrorMessage(error)
+        throw error
+      }
+    },
+
+    async signup(credentials: SignupCredentials): Promise<SessionUser> {
+      this.status = 'pending'
+      this.loginError = null
+
+      try {
+        const { user } = await authRequest<LoginResponse>('/auth/signup', {
           method: 'POST',
           body: credentials,
         })

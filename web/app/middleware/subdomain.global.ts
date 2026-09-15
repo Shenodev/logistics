@@ -1,4 +1,6 @@
 export default defineNuxtRouteMiddleware((to) => {
+  if (to.path === '/login' || to.path === '/signup') return
+
   const role = useAppRole()
   const layout = role === 'admin' ? 'admin' : 'user'
 

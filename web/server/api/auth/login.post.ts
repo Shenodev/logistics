@@ -1,4 +1,5 @@
 import { SESSION_COOKIE, type LoginResponse, type SessionUser } from '../../../shared/auth'
+import { findDevUser } from '../../utils/devRegistry'
 
 interface Account {
   email: string
@@ -8,7 +9,7 @@ interface Account {
 }
 
 function resolveAccount(config: Record<string, unknown>, email: string, password: string): Account | null {
-  const accounts: Account[] = [
+  const seeded: Account[] = [
     {
       email: String(config.devAdminEmail),
       password: String(config.devAdminPassword),
@@ -23,7 +24,15 @@ function resolveAccount(config: Record<string, unknown>, email: string, password
     },
   ]
 
-  return accounts.find((account) => account.email === email && account.password === password) ?? null
+  const match = seeded.find((account) => account.email === email && account.password === password)
+  if (match) return match
+
+  const registered = findDevUser(email)
+  if (registered && registered.password === password) {
+    return { email: registered.email, password: registered.password, name: registered.name, role: registered.role }
+  }
+
+  return null
 }
 
 export default defineEventHandler(async (event): Promise<LoginResponse> => {

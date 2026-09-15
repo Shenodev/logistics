@@ -13,6 +13,12 @@ export interface LoginCredentials {
   password: string
 }
 
+export interface SignupCredentials {
+  name: string
+  email: string
+  password: string
+}
+
 export interface SessionUser {
   id: string
   email: string

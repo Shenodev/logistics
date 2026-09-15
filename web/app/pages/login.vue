@@ -1,73 +1,107 @@
 <template>
-  <main class="flex-1 flex items-center justify-center p-8">
-    <Card class="w-full max-w-sm bg-card border-border">
-      <CardHeader>
-        <CardTitle class="text-2xl font-heading">Sign in to ShenoFlow</CardTitle>
-        <CardDescription>
-          {{ isAdminHost ? 'Dispatcher / Admin access' : 'Customer portal access' }}
-        </CardDescription>
-      </CardHeader>
-      <form @submit.prevent="handleSubmit">
-        <CardContent class="space-y-4">
-          <div class="space-y-2">
-            <Label for="email" class="text-sm font-medium">Email</Label>
+  <AuthShell
+    title="Sign in to ShenoFlow"
+    :description="isAdminHost ? 'Dispatcher / Admin access' : 'Customer portal access'"
+  >
+    <form @submit="onSubmit" novalidate class="space-y-5">
+      <FormField v-slot="{ componentField }" name="email">
+        <FormItem>
+          <FormLabel>Email</FormLabel>
+          <FormControl>
             <Input
-              id="email"
-              v-model="email"
+              v-bind="componentField"
               type="email"
-              autocomplete="email"
               placeholder="you@sheno.dev"
+              autocomplete="email"
               class="bg-secondary border-border"
-              required
             />
-          </div>
-          <div class="space-y-2">
-            <Label for="password" class="text-sm font-medium">Password</Label>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <FormField v-slot="{ componentField }" name="password">
+        <FormItem>
+          <FormLabel>Password</FormLabel>
+          <FormControl>
             <Input
-              id="password"
-              v-model="password"
+              v-bind="componentField"
               type="password"
-              autocomplete="current-password"
               placeholder="••••••••"
+              autocomplete="current-password"
               class="bg-secondary border-border"
-              required
             />
-          </div>
-          <p v-if="auth.loginError" class="text-sm text-destructive">{{ auth.loginError }}</p>
-        </CardContent>
-        <CardFooter class="flex flex-col items-stretch gap-2">
-          <Button type="submit" class="bg-primary text-primary-foreground" :disabled="auth.isPending">
-            {{ auth.isPending ? 'Signing in...' : 'Sign in' }}
-          </Button>
-          <p class="text-center text-xs text-muted-foreground">
-            Dev demo: use <code class="text-cyan-300">{{ devHint }}</code>
-          </p>
-        </CardFooter>
-      </form>
-    </Card>
-  </main>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <p
+        v-if="auth.loginError"
+        class="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+      >
+        {{ auth.loginError }}
+      </p>
+
+      <Button type="submit" class="w-full" :disabled="auth.isPending">
+        {{ auth.isPending ? 'Signing in…' : 'Sign in' }}
+      </Button>
+      <p class="text-center text-xs text-muted-foreground">
+        Dev demo:
+        <code class="text-cyan-300">{{ devHint }}</code>
+      </p>
+    </form>
+
+    <template #footer>
+      <div class="flex items-center gap-3">
+        <Separator class="flex-1 bg-border" />
+        <span class="text-xs text-muted-foreground">or</span>
+        <Separator class="flex-1 bg-border" />
+      </div>
+      <Button variant="outline" class="w-full" as-child>
+        <NuxtLink to="/signup">Create an account</NuxtLink>
+      </Button>
+    </template>
+  </AuthShell>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'guest' })
+import * as z from 'zod'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+
+definePageMeta({ layout: false, middleware: 'guest' })
 
 const route = useRoute()
 const isAdminHost = useAppRole() === 'admin'
-
-const email = ref('')
-const password = ref('')
 const auth = useAuthStore()
+
+const loginSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string({ required_error: 'Email is required' })
+      .email('Enter a valid email address'),
+    password: z
+      .string({ required_error: 'Password is required' })
+      .min(1, 'Password is required'),
+  }),
+)
+
+const { handleSubmit } = useForm({
+  validationSchema: loginSchema,
+  initialValues: { email: '', password: '' },
+})
 
 const devHint = isAdminHost ? 'admin@sheno.dev / admin123' : 'user@sheno.dev / user123'
 
-async function handleSubmit() {
+const onSubmit = handleSubmit(async ({ email, password }) => {
   try {
-    await auth.login({ email: email.value, password: password.value })
+    await auth.login({ email, password })
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     await navigateTo(redirect)
   }
   catch {
     // error surfaced via auth.loginError
   }
-}
+})
 </script>
