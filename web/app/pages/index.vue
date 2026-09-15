@@ -1,392 +1,389 @@
-<template>
-  <main class="flex-1">
-    <div class="mx-auto w-full max-w-6xl px-4 py-8 lg:px-6 lg:py-10">
-      <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p class="font-heading text-xs font-semibold uppercase tracking-widest text-cyan-400">
-            Fleet overview
-          </p>
-          <h1 class="mt-2 font-heading text-3xl font-bold tracking-tight text-foreground">
-            Welcome back, {{ firstName }} <span v-if="today" class="font-normal text-muted-foreground">· {{ today }}</span>
-          </h1>
-          <p class="mt-1.5 text-sm text-muted-foreground">
-            {{ greetingLine }}
-          </p>
-        </div>
-        <Button variant="secondary" size="sm" class="bg-secondary text-secondary-foreground" @click="scrollToTracking">
-          Track a shipment
-        </Button>
-      </div>
-
-      <section aria-label="Quick stats" class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Card class="gap-0 border-border bg-card/50">
-          <CardHeader class="flex-row items-center justify-between px-5 py-4">
-            <p class="text-sm text-muted-foreground">In transit</p>
-            <span class="flex size-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="size-5" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h10l2 4v6h-2M8 6 6 10H2a1 1 0 0 0-1 1v5h2" />
-                <circle cx="6" cy="17.5" r="1.8" />
-                <circle cx="16" cy="17.5" r="1.8" />
-              </svg>
-            </span>
-          </CardHeader>
-          <CardContent class="px-5 pb-4">
-            <p class="font-mono text-3xl font-semibold tracking-tight text-foreground">24</p>
-            <p class="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span class="text-emerald-400">+4</span> vs. yesterday
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card class="gap-0 border-border bg-card/50">
-          <CardHeader class="flex-row items-center justify-between px-5 py-4">
-            <p class="text-sm text-muted-foreground">Pickups today</p>
-            <span class="flex size-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="size-5" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 8h11v8H4zM15 10h3l2 2v4h-5z" />
-              </svg>
-            </span>
-          </CardHeader>
-          <CardContent class="px-5 pb-4">
-            <p class="font-mono text-3xl font-semibold tracking-tight text-foreground">12</p>
-            <p class="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span class="text-amber-400">3 due</span> by 14:00
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card class="gap-0 border-border bg-card/50">
-          <CardHeader class="flex-row items-center justify-between px-5 py-4">
-            <p class="text-sm text-muted-foreground">Delivered this month</p>
-            <span class="flex size-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="size-5" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16v10H4zM8 7V4h8v3" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="m8.5 14.5 2.4 2.4 4.6-4.6" />
-              </svg>
-            </span>
-          </CardHeader>
-          <CardContent class="px-5 pb-4">
-            <p class="font-mono text-3xl font-semibold tracking-tight text-foreground">186</p>
-            <p class="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span class="text-emerald-400">+12%</span> vs. last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card class="gap-0 border-border bg-card/50">
-          <CardHeader class="flex-row items-center justify-between px-5 py-4">
-            <p class="text-sm text-muted-foreground">On-time rate</p>
-            <span class="flex size-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="size-5" aria-hidden="true">
-                <circle cx="12" cy="12" r="8.5" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 2" />
-              </svg>
-            </span>
-          </CardHeader>
-          <CardContent class="px-5 pb-4">
-            <p class="font-mono text-3xl font-semibold tracking-tight text-foreground">93%</p>
-            <Progress :model-value="93" class="mt-2" />
-            <p class="mt-1.5 text-xs text-muted-foreground">Last 30 days</p>
-          </CardContent>
-        </Card>
-      </section>
-
-      <div class="mt-6 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
-        <Card id="tracking" class="border-border bg-card/50">
-          <CardHeader>
-            <CardTitle class="font-heading text-lg font-semibold tracking-tight">
-              Track a shipment
-            </CardTitle>
-            <CardDescription>
-              Enter a consignment reference to see live status and estimated delivery.
-            </CardDescription>
-          </CardHeader>
-          <CardContent class="space-y-4">
-            <form class="flex flex-col gap-3 sm:flex-row" novalidate @submit.prevent="trackShipment">
-              <Input
-                v-model="trackingInput"
-                placeholder="e.g. SN-2026-0118"
-                inputmode="text"
-                aria-label="Shipment reference"
-                class="bg-secondary border-border h-10 font-mono"
-                @keyup.enter="trackShipment"
-              />
-              <Button type="submit" class="gap-1.5 h-10 shrink-0" :disabled="searchState === 'loading'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" />
-                  <path stroke-linecap="round" d="m20 20-3.5-3.5" />
-                </svg>
-                Track
-              </Button>
-            </form>
-
-            <p v-if="searchState === 'empty'" class="text-sm text-destructive">
-              Enter a shipment reference to track it.
-            </p>
-            <p v-else-if="searchState === 'not_found'" class="text-sm text-destructive">
-              No shipment found for <code class="font-mono">{{ trackingInput }}</code>. Double-check the reference and try again.
-            </p>
-
-            <Transition name="track-result" mode="out-in">
-              <div v-if="searchState === 'loading'" key="loading" class="space-y-3">
-                <Skeleton class="h-4 w-2/3 bg-secondary" />
-                <Skeleton class="h-10 w-full bg-secondary" />
-                <Skeleton class="h-3 w-1/2 bg-secondary" />
-              </div>
-
-              <div v-else-if="searchState === 'found' && result" key="result" class="rounded-xl border border-border bg-secondary/40 p-4">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <code class="font-mono text-sm font-semibold text-cyan-300">{{ result.id }}</code>
-                  <Badge class="bg-cyan-500/15 text-cyan-300">
-                    {{ STATUS_FLOW[result.status].label }}
-                  </Badge>
-                </div>
-
-                <div class="mt-4">
-                  <div class="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{{ result.origin }}</span>
-                    <span>{{ result.destination }}</span>
-                  </div>
-                  <div class="mt-2 flex items-center gap-2">
-                    <template v-for="(stage, i) in STATUS_STAGES" :key="stage">
-                      <span
-                        class="size-2 shrink-0 rounded-full transition-colors"
-                        :class="i <= currentStageIndex ? 'bg-cyan-400' : 'bg-border'"
-                      />
-                      <span
-                        v-if="i < STATUS_STAGES.length - 1"
-                        :key="`connector-${i}`"
-                        class="h-0.5 flex-1 rounded-full"
-                        :class="i < currentStageIndex ? 'bg-cyan-400/70' : 'bg-border'"
-                      />
-                    </template>
-                  </div>
-                  <div class="mt-2 flex items-center justify-between gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                    <template v-for="(stage, i) in STATUS_STAGES" :key="stage">
-                      <span class="whitespace-nowrap" :class="i <= currentStageIndex ? 'text-cyan-300' : ''">{{ stage }}</span>
-                    </template>
-                  </div>
-                </div>
-
-                <div class="mt-4 grid grid-cols-2 gap-3 border-t border-border/60 pt-3 text-sm">
-                  <div>
-                    <p class="text-xs text-muted-foreground">ETA</p>
-                    <p class="font-mono font-medium text-foreground">{{ result.eta }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs text-muted-foreground">Carrier</p>
-                    <p class="font-medium text-foreground">{{ result.carrier }}</p>
-                  </div>
-                </div>
-              </div>
-            </Transition>
-          </CardContent>
-        </Card>
-
-        <Card class="border-border bg-card/50">
-          <CardHeader class="flex-row items-center justify-between">
-            <div class="space-y-1">
-              <CardTitle class="font-heading text-lg font-semibold tracking-tight">
-                Recent activity
-              </CardTitle>
-              <CardDescription class="text-sm">
-                Latest movements across your network.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent class="pt-0">
-            <Tabs v-model="activityFilter" default-value="all" class="mb-4">
-              <TabsList class="w-full bg-secondary/60">
-                <TabsTrigger value="all" class="flex-1">All</TabsTrigger>
-                <TabsTrigger value="shipment" class="flex-1">Shipments</TabsTrigger>
-                <TabsTrigger value="system" class="flex-1">System</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <ol class="space-y-1">
-              <li
-                v-for="item in filteredActivity"
-                :key="item.id"
-                class="flex gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-secondary/40"
-              >
-                <span
-                  class="mt-0.5 size-8 shrink-0 rounded-lg border border-border bg-secondary/60 flex items-center justify-center"
-                  :class="item.kind === 'system' ? 'text-muted-foreground' : 'text-cyan-400'"
-                >
-                  <svg v-if="item.kind === 'shipment'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="size-4" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h10l2 4v6h-2M8 6 6 10H2a1 1 0 0 0-1 1v5h2" />
-                    <circle cx="6" cy="17.5" r="1.8" />
-                    <circle cx="16" cy="17.5" r="1.8" />
-                  </svg>
-                  <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="size-4" aria-hidden="true">
-                    <circle cx="12" cy="12" r="3.2" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3.2v2.4M12 18.4v2.4M3.2 12h2.4M18.4 12h2.4" />
-                  </svg>
-                </span>
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-baseline justify-between gap-2">
-                    <p class="truncate text-sm font-medium text-foreground">{{ item.title }}</p>
-                    <span class="shrink-0 text-xs text-muted-foreground">{{ item.time }}</span>
-                  </div>
-                  <p class="truncate text-xs text-muted-foreground">{{ item.body }}</p>
-                </div>
-              </li>
-              <li v-if="filteredActivity.length === 0" class="px-2 py-4 text-sm text-muted-foreground">
-                No activity in this category yet.
-              </li>
-            </ol>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  </main>
-</template>
-
 <script setup lang="ts">
+import { activityFeed, recentQueries, type ActivityCategory } from '~~/app/data/shipments'
+
 definePageMeta({ middleware: 'auth' })
 
 useSeoMeta({
   title: 'Dashboard',
-  description: 'Overview of your freight network — quick stats, recent activity, and shipment tracking.',
+  description: 'Overview of your freight network — live tracking, quick stats, and recent activity across the Sheno logistics grid.',
 })
 
+const router = useRouter()
 const auth = useAuthStore()
 
 const firstName = computed(() => auth.user?.name?.split(' ')[0] || 'there')
-const greetingLine = computed(() =>
-  auth.isAdmin
-    ? 'Network-wide dispatch view for assigned freight and fleet.'
-    : "Here's what's moving across your network today.",
-)
 
 const today = ref('')
+const nowUtc = ref('')
 onMounted(() => {
-  today.value = new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
+  const now = new Date()
+  today.value = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
+  nowUtc.value = now.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+    hour12: false,
   })
 })
 
-type TrackingStatus = 'booked' | 'pickup' | 'in_transit' | 'out_for_delivery' | 'delivered'
-
-interface Shipment {
-  id: string
-  origin: string
-  destination: string
-  status: TrackingStatus
-  eta: string
-  carrier: string
-}
-
-const STATUS_STAGES = ['Booked', 'Pickup', 'In transit', 'Out for delivery', 'Delivered']
-
-const STATUS_FLOW: Record<TrackingStatus, { label: string; index: number }> = {
-  booked: { label: 'Booked', index: 0 },
-  pickup: { label: 'Picked up', index: 1 },
-  in_transit: { label: 'In transit', index: 2 },
-  out_for_delivery: { label: 'Out for delivery', index: 3 },
-  delivered: { label: 'Delivered', index: 4 },
-}
-
-const shipments: Shipment[] = [
-  {
-    id: 'SN-2026-0118',
-    origin: 'Port Said',
-    destination: 'Cairo Distribution Hub',
-    status: 'in_transit',
-    eta: 'Thu, 14:30',
-    carrier: 'Truck EG-8841',
-  },
-  {
-    id: 'SN-2026-0097',
-    origin: 'Alexandria',
-    destination: 'Tanta Depot',
-    status: 'out_for_delivery',
-    eta: 'Today, 16:00',
-    carrier: 'Truck EG-5520',
-  },
-  {
-    id: 'SN-2026-0124',
-    origin: 'Cairo Hub',
-    destination: 'Giza Gateway',
-    status: 'booked',
-    eta: 'Fri, 09:00',
-    carrier: 'Assigned shortly',
-  },
-]
-
 const trackingInput = ref('')
-const searchState = ref<'idle' | 'loading' | 'empty' | 'found' | 'not_found'>('idle')
-const result = ref<Shipment | null>(null)
-let searchTimer: ReturnType<typeof setTimeout> | undefined
+const emptyQuery = ref(false)
 
 function trackShipment() {
   const query = trackingInput.value.trim()
   if (!query) {
-    searchState.value = 'empty'
-    result.value = null
+    emptyQuery.value = true
     return
   }
-  searchState.value = 'loading'
-  clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {
-    const found = shipments.find((shipment) => shipment.id === query.toUpperCase())
-    if (found) {
-      result.value = found
-      searchState.value = 'found'
-    }
-    else {
-      result.value = null
-      searchState.value = 'not_found'
-    }
-  }, 600)
+  router.push(`/shipments/${encodeURIComponent(query)}`)
 }
 
-const currentStageIndex = computed(() => (result.value ? STATUS_FLOW[result.value.status].index : 0))
-
-function scrollToTracking() {
-  if (import.meta.client) {
-    document.getElementById('tracking')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+function trackRecent(id: string) {
+  trackingInput.value = id
+  router.push(`/shipments/${encodeURIComponent(id)}`)
 }
 
-interface ActivityItem {
-  id: number
-  kind: 'shipment' | 'system'
-  title: string
-  body: string
-  time: string
+type Stat = {
+  label: string
+  badge: string
+  badgeTone: 'primary' | 'tertiary'
+  badgeIcon?: string
+  value: string
+  valueCaption: string
+  footnote: string
+  footerLabel: string
+  footerValue: string
+  footerKind: 'bar' | 'stepper' | 'text'
+  barPct?: number
+  barTone?: 'primary' | 'tertiary'
 }
 
-const activity: ActivityItem[] = [
-  { id: 1, kind: 'shipment', title: 'SN-2026-0118 departed Port Said', body: 'En route to Cairo Distribution Hub · ETA Thu, 14:30', time: '12m ago' },
-  { id: 2, kind: 'shipment', title: 'SN-2026-0097 delivered', body: 'Proof of delivery captured at Tanta Depot', time: '1h ago' },
-  { id: 3, kind: 'system', title: 'Rates refreshed', body: '14 lanes updated for the upcoming week', time: '3h ago' },
-  { id: 4, kind: 'shipment', title: 'SN-2026-0124 booked', body: 'Pickup window confirmed for Fri, 08:00–10:00', time: '6h ago' },
-  { id: 5, kind: 'system', title: 'Fleet check completed', body: 'All 31 vehicles passed the morning inspection', time: '9h ago' },
-  { id: 6, kind: 'shipment', title: 'SN-2026-0084 damaged on arrival', body: 'Claim filed against carrier · review pending', time: '1d ago' },
+const stats: Stat[] = [
+  {
+    label: 'Active Shipments',
+    badge: '+12% MoM',
+    badgeTone: 'primary',
+    badgeIcon: 'trending_up',
+    value: '24',
+    valueCaption: 'In-Transit',
+    footnote: '+3 scheduled for carrier release today',
+    footerLabel: 'Network Saturation',
+    footerValue: '82%',
+    footerKind: 'bar',
+    barPct: 82,
+    barTone: 'primary',
+  },
+  {
+    label: 'Pending Deliveries',
+    badge: '2 Pending Customs',
+    badgeTone: 'tertiary',
+    badgeIcon: 'warning',
+    value: '6',
+    valueCaption: 'Arriving Today',
+    footnote: '4 on schedule for final warehouse intake',
+    footerLabel: 'Gate Clearance',
+    footerValue: '2 Holds · Rotterdam',
+    footerKind: 'stepper',
+  },
+  {
+    label: 'Total Spent This Month',
+    badge: '-4.5% vs Forecast',
+    badgeTone: 'primary',
+    value: '$148,290.00',
+    valueCaption: 'USD',
+    footnote: '19 Invoices reconciled · 3 draft',
+    footerLabel: 'Next Settlement Batch:',
+    footerValue: 'Nov 28, 2024',
+    footerKind: 'text',
+  },
 ]
 
-const activityFilter = ref<'all' | 'shipment' | 'system'>('all')
-const filteredActivity = computed(() => {
-  if (activityFilter.value === 'all') {
-    return activity
-  }
-  return activity.filter((item) => item.kind === activityFilter.value)
-})
+const filterTabs: Array<{ key: ActivityCategory | 'updates'; label: string }> = [
+  { key: 'updates', label: 'All Updates' },
+  { key: 'alerts', label: 'Exceptions & Alerts' },
+  { key: 'customs', label: 'Customs' },
+  { key: 'delivered', label: 'Delivered' },
+]
 
-onUnmounted(() => clearTimeout(searchTimer))
+const activeFilter = ref<ActivityCategory | 'updates'>('updates')
+
+const filteredActivity = computed(() => {
+  if (activeFilter.value === 'updates') return activityFeed
+  return activityFeed.filter((item) => item.category === activeFilter.value)
+})
 </script>
 
-<style scoped>
-.track-result-enter-active,
-.track-result-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-.track-result-enter-from,
-.track-result-leave-to {
-  opacity: 0;
-  transform: translateY(4px);
-}
-</style>
+<template>
+  <main class="bg-background">
+    <div class="mx-auto max-w-[1600px] space-y-6 p-6">
+      <!-- Track Shipment Command Surface -->
+      <section class="rounded-xl border border-outline-variant bg-surface-container p-6">
+        <div class="mb-4 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <div class="flex items-center gap-1 text-label-sm text-on-surface-variant">
+              <MIcon name="schedule" class="text-[14px]" />
+              <span v-if="today">{{ today }} · Global Telemetry Live</span>
+              <span v-else>{{ nowUtc }} · Global Telemetry Live</span>
+            </div>
+            <h2 class="mt-1 font-heading text-headline-lg font-bold text-on-surface">
+              Welcome back, {{ firstName }}
+            </h2>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="flex items-center gap-1 rounded border border-outline-variant bg-surface-container-high px-2.5 py-1 text-label-sm text-on-surface-variant">
+              <MIcon name="check_circle" class="text-[14px] text-primary" />
+              Port Status: Normal
+            </span>
+            <span class="flex items-center gap-1 rounded border border-outline-variant bg-surface-container-high px-2.5 py-1 text-label-sm text-on-surface-variant">
+              <MIcon name="airplanemode_active" class="text-[14px] text-primary" />
+              Air Corridors: Clear
+            </span>
+          </div>
+        </div>
+
+        <form novalidate class="space-y-1" @submit.prevent="trackShipment">
+          <div class="flex flex-col gap-1 sm:flex-row">
+            <div class="relative flex-1">
+              <MIcon name="qr_code_scanner" class="absolute top-1/2 left-3.5 -translate-y-1/2 text-primary" />
+              <input
+                v-model="trackingInput"
+                class="w-full rounded-lg border border-outline-variant bg-surface py-3 pr-4 pl-11 font-body-md font-telemetry-numeric text-body-md text-on-surface transition-colors placeholder:text-outline focus:border-primary focus:outline-none"
+                type="text"
+                placeholder="Enter Carrier Tracking Number, Container ID, or Waybill (e.g. SHP-89421-US)..."
+                aria-label="Tracking number"
+                @keyup.enter="trackShipment"
+              />
+            </div>
+            <Button
+              type="submit"
+              class="flex items-center justify-center gap-1 rounded-lg bg-primary-container px-8 py-3 font-label-md font-bold text-on-primary-container transition-colors duration-150 hover:bg-primary active:scale-[0.98]"
+            >
+              <MIcon name="travel_explore" class="text-[18px]" />
+              <span>Track</span>
+            </Button>
+          </div>
+
+          <p v-if="emptyQuery" class="text-body-sm text-destructive">
+            Enter a tracking number, container ID, or waybill to continue.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-1 pt-1">
+            <span class="text-label-sm text-outline">Recent Queries:</span>
+            <button
+              v-for="id in recentQueries"
+              :key="id"
+              type="button"
+              class="rounded border border-outline-variant bg-surface-container-high px-2 py-0.5 font-label-sm font-telemetry-numeric text-primary transition-colors hover:bg-surface-container-highest"
+              @click="trackRecent(id)"
+            >
+              {{ id }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Quick Stats Row -->
+      <section aria-label="Quick stats" class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div
+          v-for="stat in stats"
+          :key="stat.label"
+          class="relative flex flex-col justify-between overflow-hidden rounded-xl border border-outline-variant bg-surface-container p-4"
+        >
+          <div>
+            <div class="mb-1 flex items-center justify-between">
+              <span class="text-label-sm uppercase tracking-wider text-on-surface-variant">{{ stat.label }}</span>
+              <span
+                class="flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-label-sm font-semibold"
+                :class="stat.badgeTone === 'primary'
+                  ? 'border-primary/20 bg-primary/10 text-primary'
+                  : 'border-tertiary-container/30 bg-tertiary-container/20 text-tertiary'"
+              >
+                <MIcon v-if="stat.badgeIcon" :name="stat.badgeIcon" class="text-[12px]" />
+                {{ stat.badge }}
+              </span>
+            </div>
+            <div class="mb-1 flex items-baseline gap-1">
+              <span class="font-heading font-telemetry-numeric text-3xl leading-tight font-bold text-on-surface">{{ stat.value }}</span>
+              <span class="text-body-sm font-semibold" :class="stat.badgeTone === 'tertiary' ? 'text-tertiary' : 'text-primary'">
+                {{ stat.valueCaption }}
+              </span>
+            </div>
+            <p class="text-body-sm text-on-surface-variant">{{ stat.footnote }}</p>
+          </div>
+
+          <div class="mt-4 border-t border-outline-variant/60 pt-4">
+            <template v-if="stat.footerKind === 'bar'">
+              <div class="mb-1 flex items-center justify-between font-label-sm text-on-surface-variant">
+                <span>{{ stat.footerLabel }}</span>
+                <span class="font-telemetry-numeric text-on-surface">{{ stat.footerValue }}</span>
+              </div>
+              <div class="h-1.5 w-full overflow-hidden rounded-full bg-surface-container-high">
+                <div class="h-full rounded-full bg-primary" :style="{ width: `${stat.barPct}%` }" />
+              </div>
+            </template>
+            <template v-else-if="stat.footerKind === 'stepper'">
+              <div class="flex items-center justify-between font-label-sm">
+                <span class="text-on-surface-variant">{{ stat.footerLabel }}</span>
+                <span class="font-telemetry-numeric text-tertiary">{{ stat.footerValue }}</span>
+              </div>
+              <div class="mt-1.5 grid grid-cols-6 gap-1">
+                <div v-for="n in 4" :key="`done-${n}`" class="h-1.5 rounded bg-primary" />
+                <div v-for="n in 2" :key="`hold-${n}`" class="h-1.5 rounded bg-tertiary" />
+              </div>
+            </template>
+            <template v-else>
+              <div class="flex items-center justify-between font-label-sm">
+                <span class="text-on-surface-variant">{{ stat.footerLabel }}</span>
+                <span class="font-telemetry-numeric font-medium text-on-surface">{{ stat.footerValue }}</span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Content Split -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <!-- Left: Activity Feed -->
+        <section class="flex flex-col rounded-xl border border-outline-variant bg-surface-container p-4 lg:col-span-8">
+          <div class="flex flex-col justify-between gap-2 border-b border-outline-variant pb-4 sm:flex-row sm:items-center">
+            <div>
+              <h3 class="font-heading text-headline-sm font-bold text-on-surface">Recent Activity Feed</h3>
+              <p class="text-body-sm text-on-surface-variant">Continuous telemetry stream from freight corridors</p>
+            </div>
+            <div class="flex items-center gap-1 rounded-lg border border-outline-variant bg-surface-low p-1">
+              <button
+                v-for="tab in filterTabs"
+                :key="tab.key"
+                type="button"
+                class="rounded px-2.5 py-1 text-label-sm transition-colors"
+                :class="activeFilter === tab.key
+                  ? 'bg-surface-container-highest font-semibold text-primary'
+                  : 'font-label-sm text-on-surface-variant hover:text-on-surface'"
+                @click="activeFilter = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
+          </div>
+
+          <ol class="flex-1 space-y-4 py-4">
+            <li v-for="item in filteredActivity" :key="item.id" class="flex gap-4">
+              <div class="flex flex-col items-center">
+                <div class="z-10 flex size-8 items-center justify-center rounded-full border border-outline-variant bg-surface-container-high text-primary">
+                  <MIcon :name="item.icon" class="text-[16px]" />
+                </div>
+                <div class="mt-1 h-full w-px bg-outline-variant" />
+              </div>
+              <div class="flex-1 pb-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1">
+                    <NuxtLink
+                      :to="`/shipments/${item.shipmentId}`"
+                      class="text-body-md font-semibold text-primary hover:underline"
+                    >
+                      {{ item.shipmentId }}
+                    </NuxtLink>
+                    <span class="rounded border border-outline-variant bg-surface-container-high px-1.5 py-0.5 text-label-sm text-on-surface-variant">
+                      {{ item.mode }}
+                    </span>
+                  </div>
+                  <span class="font-telemetry-numeric text-label-sm text-outline">{{ item.time }}</span>
+                </div>
+                <p class="mt-1 text-body-md text-on-surface">{{ item.title }}</p>
+                <div class="mt-2 flex items-center gap-4 text-label-sm text-on-surface-variant">
+                  <span class="flex items-center gap-1">
+                    <MIcon name="location_on" class="text-[14px]" />
+                    {{ item.location }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <MIcon name="directions_boat" class="text-[14px]" />
+                    {{ item.carrier }}
+                  </span>
+                </div>
+              </div>
+            </li>
+            <li v-if="filteredActivity.length === 0" class="py-4 text-center text-body-sm text-on-surface-variant">
+              No events in this category right now.
+            </li>
+          </ol>
+
+          <div class="flex justify-center border-t border-outline-variant pt-2">
+            <NuxtLink to="/shipments" class="flex items-center gap-1 text-label-md text-primary transition-colors hover:text-on-surface">
+              <span>View Full Manifest History</span>
+              <MIcon name="arrow_forward" class="text-[16px]" />
+            </NuxtLink>
+          </div>
+        </section>
+
+        <!-- Right: Quick Actions + Fleet Advisory -->
+        <div class="space-y-6 lg:col-span-4">
+          <section class="space-y-4 rounded-xl border border-outline-variant bg-surface-container p-4">
+            <div>
+              <h3 class="font-heading text-headline-sm font-bold text-on-surface">Quick Actions</h3>
+              <p class="text-body-sm text-on-surface-variant">Instant logistics orchestration controls</p>
+            </div>
+            <div class="space-y-1">
+              <Button class="w-full items-center justify-between rounded-lg bg-primary-container py-3 font-label-md font-bold text-on-primary-container transition-colors duration-150 hover:bg-primary active:scale-[0.98]" as-child>
+                <NuxtLink to="/shipments">
+                  <span>Create New Shipment</span>
+                  <MIcon name="arrow_forward" class="text-[18px]" />
+                </NuxtLink>
+              </Button>
+              <Button class="w-full items-center justify-between rounded-lg bg-secondary-container py-3 font-label-md font-semibold text-on-secondary-container transition-colors duration-150 hover:opacity-90 active:scale-[0.98]" as-child>
+                <NuxtLink to="/shipments?new=quote">
+                  <span>Request Freight Quote</span>
+                  <MIcon name="request_quote" class="text-[18px]" />
+                </NuxtLink>
+              </Button>
+            </div>
+            <div class="space-y-1 border-t border-outline-variant pt-1">
+              <span class="block py-1 text-label-sm uppercase tracking-wider text-outline">Operational Shortcuts</span>
+              <NuxtLink to="/shipments" class="flex items-center justify-between rounded-lg p-2 text-body-sm text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface">
+                <span class="flex items-center gap-1">
+                  <MIcon name="download" class="text-[16px] text-primary" />
+                  <span>Download Monthly Manifest (CSV)</span>
+                </span>
+                <MIcon name="chevron_right" class="text-[14px] text-outline" />
+              </NuxtLink>
+              <NuxtLink to="/profile" class="flex items-center justify-between rounded-lg p-2 text-body-sm text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface">
+                <span class="flex items-center gap-1">
+                  <MIcon name="eco" class="text-[16px] text-primary" />
+                  <span>Carbon Offset Report</span>
+                </span>
+                <MIcon name="chevron_right" class="text-[14px] text-outline" />
+              </NuxtLink>
+              <NuxtLink to="/shipments?new=quote" class="flex items-center justify-between rounded-lg p-2 text-body-sm text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface">
+                <span class="flex items-center gap-1">
+                  <MIcon name="schedule_send" class="text-[16px] text-primary" />
+                  <span>Schedule Carrier Pickup</span>
+                </span>
+                <MIcon name="chevron_right" class="text-[14px] text-outline" />
+              </NuxtLink>
+            </div>
+          </section>
+
+          <section class="relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container p-4">
+            <div class="flex items-start gap-2">
+              <div class="rounded-lg border border-tertiary-container/30 bg-tertiary-container/20 p-2 text-tertiary">
+                <MIcon name="warning_amber" class="text-[20px]" />
+              </div>
+              <div>
+                <div class="flex items-center gap-1">
+                  <h4 class="font-heading text-[15px] font-semibold text-on-surface">Fleet Advisory: North Atlantic</h4>
+                  <span class="rounded border border-tertiary-container/30 bg-surface-container-high px-1.5 py-0.5 text-[10px] font-semibold uppercase text-tertiary">Caution</span>
+                </div>
+                <p class="mt-1.5 text-body-sm leading-relaxed text-on-surface-variant">
+                  Severe meteorological depression active across Corridor NA-4. Routing algorithms have automatically offset deep-draft container vessels 45 nautical miles south.
+                </p>
+                <div class="mt-3 flex items-center justify-between border-t border-outline-variant/60 pt-2 text-label-sm text-on-surface-variant">
+                  <span class="font-medium text-primary">Zero system downtime detected</span>
+                  <NuxtLink to="/shipments" class="underline transition-colors hover:text-primary">Details</NuxtLink>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</template>
