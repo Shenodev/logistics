@@ -118,6 +118,11 @@ import { useForm } from 'vee-validate'
 
 definePageMeta({ layout: false, middleware: 'guest' })
 
+useSeoMeta({
+  title: 'Create account',
+  description: 'Create a ShenoFlow account to start moving freight on the Sheno B2B logistics network.',
+})
+
 const auth = useAuthStore()
 
 const signupSchema = toTypedSchema(

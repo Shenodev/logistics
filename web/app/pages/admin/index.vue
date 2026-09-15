@@ -37,6 +37,11 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'admin' })
 
+useSeoMeta({
+  title: 'Admin console',
+  description: 'Dispatcher and admin console for the ShenoFlow logistics network.',
+})
+
 const auth = useAuthStore()
 const host = useRequestURL().hostname
 

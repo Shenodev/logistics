@@ -7,9 +7,9 @@ export default defineNuxtConfig({
   css: ['~/assets/css/tailwind.css'],
   app: {
     head: {
-      link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        { rel: 'icon', type: 'image/png', href: '/logo-icon.png' },
+      title: 'ShenoFlow',
+      meta: [
+        { name: 'description', content: 'ShenoFlow — B2B logistics portal for fleet, dispatch, and shipment tracking.' },
       ],
     },
   },
@@ -23,6 +23,7 @@ export default defineNuxtConfig({
       appDomain: 'logistics.shenodev.tech',
       adminSubdomain: 'admin',
       apiBase: 'http://localhost:8000',
+      siteUrl: 'https://logistics.shenodev.tech',
     },
   },
   vite: {

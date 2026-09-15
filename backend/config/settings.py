@@ -29,7 +29,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'true').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get(
     'DJANGO_ALLOWED_HOSTS',
-    'api.logistics.shenodev.tech,localhost,127.0.0.1',
+    'api.logistics.shenodev.tech,localhost,127.0.0.1,.vercel.app',
 ).split(',')
 
 
@@ -114,12 +114,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+#
+# Default to SQLite for local development. On Vercel (serverless), SQLite is
+# ephemeral — set ``DATABASE_URL`` to a managed Postgres instance instead.
+
+import dj_database_url  # noqa: E402
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=60,
+    )
 }
 
 

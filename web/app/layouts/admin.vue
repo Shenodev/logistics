@@ -10,7 +10,7 @@
     <slot />
 
     <footer class="mt-auto border-t border-border py-4 text-center text-xs text-muted-foreground">
-      admin.logistics.shenodev.tech — Dispatcher / Admin
+      Dispatcher / Admin Console
     </footer>
   </div>
 </template>

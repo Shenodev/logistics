@@ -10,7 +10,7 @@
     <slot />
 
     <footer class="mt-auto border-t border-border py-4 text-center text-xs text-muted-foreground">
-      logistics.shenodev.tech — Sheno B2B Logistics
+      Sheno B2B Logistics
     </footer>
   </div>
 </template>

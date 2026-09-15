@@ -74,6 +74,11 @@ definePageMeta({ layout: false, middleware: 'guest' })
 
 const route = useRoute()
 const isAdminHost = useAppRole() === 'admin'
+
+useSeoMeta({
+  title: `${isAdminHost ? 'Dispatcher sign in' : 'Sign in'}`,
+  description: 'Sign in to the ShenoFlow logistics portal to manage shipments, fleet, and dispatch.',
+})
 const auth = useAuthStore()
 
 const loginSchema = toTypedSchema(

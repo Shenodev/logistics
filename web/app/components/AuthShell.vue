@@ -9,7 +9,7 @@ withDefaults(defineProps<Props>(), {})
 
 <template>
   <div class="grid min-h-[100dvh] bg-background text-foreground lg:grid-cols-[1.05fr_1fr]">
-    <section class="relative hidden overflow-hidden border-r border-border lg:flex lg:flex-col lg:justify-between">
+    <section class="relative hidden overflow-hidden border-r border-border lg:flex lg:flex-col">
       <div
         class="pointer-events-none absolute inset-0 opacity-[0.05]"
         style="background-image:
@@ -19,21 +19,25 @@ withDefaults(defineProps<Props>(), {})
       />
       <div class="pointer-events-none absolute -left-32 bottom-10 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
 
-      <div class="relative z-10 p-10">
-        <AppBrand />
-      </div>
+      <div class="relative z-10 flex flex-1 flex-col">
+        <div class="p-10">
+          <AppBrand />
+        </div>
 
-      <div class="relative z-10 max-w-lg p-10 pb-14">
-        <h1 class="font-heading text-4xl font-bold leading-tight tracking-tight text-foreground">
-          Move freight like clockwork.
-        </h1>
-        <p class="mt-5 max-w-md text-muted-foreground">
-          Fleet, dispatch, and tracking for the Sheno B2B logistics network. One portal for every consignment, from pickup to proof of delivery.
-        </p>
+        <div class="flex flex-1 items-center px-10">
+          <div class="max-w-lg py-6">
+            <h1 class="font-heading text-4xl font-bold leading-tight tracking-tight text-foreground">
+              Move freight like clockwork.
+            </h1>
+            <p class="mt-5 max-w-md text-muted-foreground">
+              Fleet, dispatch, and tracking for the Sheno B2B logistics network. One portal for every consignment, from pickup to proof of delivery.
+            </p>
+          </div>
+        </div>
       </div>
 
       <footer class="relative z-10 border-t border-border/60 p-10 text-xs text-muted-foreground">
-        logistics.shenodev.tech
+        Sheno B2B Logistics
       </footer>
     </section>
 
