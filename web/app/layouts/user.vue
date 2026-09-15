@@ -23,8 +23,8 @@ const nav = [
 ]
 
 const footerNav = [
-  { label: 'Support', icon: 'help', to: '/profile' },
-  { label: 'Settings', icon: 'settings', to: '/profile' },
+  { label: 'Support', icon: 'help', to: '/support' },
+  { label: 'Settings', icon: 'settings', to: '/settings' },
 ]
 
 function isActive(to: string) {
