@@ -10,9 +10,18 @@ export default defineNuxtConfig({
     prefix: '',
     componentDir: '@/components/ui',
   },
+  runtimeConfig: {
+    public: {
+      appDomain: 'logistics.shenodev.tech',
+      adminSubdomain: 'admin',
+    },
+  },
   vite: {
     plugins: [
       tailwindcss(),
     ],
+    server: {
+      allowedHosts: ['logistics.shenodev.tech', 'admin.logistics.shenodev.tech', '.shenodev.tech', 'localhost'],
+    },
   },
 })
