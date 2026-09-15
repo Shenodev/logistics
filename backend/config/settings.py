@@ -14,8 +14,14 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import dj_database_url
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment overrides from <backend>/.env (gitignored).
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -115,16 +121,33 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 #
-# Default to SQLite for local development. On Vercel (serverless), SQLite is
-# ephemeral — set ``DATABASE_URL`` to a managed Postgres instance instead.
+# Priority:
+#   1. ``DATABASE_URL`` (e.g. Supabase Postgres via the transaction pooler on :6543)
+#   2. ``SUPABASE_DB_PASSWORD`` + ``SUPABASE_URL`` — builds the pooler connection URL
+#   3. Local SQLite (default, no env required)
 
-import dj_database_url  # noqa: E402
+SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
+SUPABASE_DB_PASSWORD = os.environ.get('SUPABASE_DB_PASSWORD', '')
+
+if os.environ.get('DATABASE_URL'):
+    DATABASE_URL = os.environ['DATABASE_URL']
+elif SUPABASE_DB_PASSWORD and '.' in SUPABASE_URL:
+    project_ref = SUPABASE_URL.replace('https://', '').split('.')[0]
+    db_region = os.environ.get('SUPABASE_DB_REGION', '')
+    db_host = (
+        f'aws-0-{db_region}.pooler.supabase.com'
+        if db_region
+        else f'{project_ref}.pooler.supabase.com'
+    )
+    DATABASE_URL = (
+        f'postgresql://postgres.{project_ref}:{SUPABASE_DB_PASSWORD}'
+        f'@{db_host}:6543/postgres'
+    )
+else:
+    DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=60,
-    )
+    'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=60),
 }
 
 

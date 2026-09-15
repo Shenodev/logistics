@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     public: {
       appDomain: 'logistics.shenodev.tech',
       adminSubdomain: 'admin',
-      apiBase: 'http://localhost:8000',
+      apiBase: 'https://api.logistics.shenodev.tech',
       siteUrl: 'https://logistics.shenodev.tech',
     },
   },
