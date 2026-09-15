@@ -5,6 +5,16 @@ export const SESSION_COOKIE_OPTIONS = {
   secure: true,
   sameSite: 'lax' as const,
   path: '/',
+  maxAge: 60 * 15,
+}
+
+export const REFRESH_COOKIE = 'shenoflow_refresh'
+
+export const REFRESH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'lax' as const,
+  path: '/',
   maxAge: 60 * 60 * 24 * 7,
 }
 

@@ -99,6 +99,16 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async tryRefresh(): Promise<boolean> {
+      try {
+        await authRequest<Record<string, unknown>>('/auth/refresh', { method: 'POST' })
+        return true
+      }
+      catch {
+        return false
+      }
+    },
+
     async hydrate() {
       if (this.status !== 'idle') return
 
@@ -109,7 +119,19 @@ export const useAuthStore = defineStore('auth', {
         this.setSession(user)
       }
       catch {
-        this.clearSession()
+        const refreshed = await this.tryRefresh()
+        if (!refreshed) {
+          this.clearSession()
+          return
+        }
+
+        try {
+          const { user } = await authRequest<LoginResponse>('/auth/me')
+          this.setSession(user)
+        }
+        catch {
+          this.clearSession()
+        }
       }
     },
 

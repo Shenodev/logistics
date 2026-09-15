@@ -82,7 +82,11 @@ AUTH_COOKIE_NAME = os.environ.get('DJANGO_AUTH_COOKIE_NAME', 'shenoflow_session'
 AUTH_COOKIE_SECURE = os.environ.get('DJANGO_AUTH_COOKIE_SECURE', 'true').lower() == 'true'
 AUTH_COOKIE_DOMAIN = os.environ.get('DJANGO_AUTH_COOKIE_DOMAIN', '') or None
 AUTH_COOKIE_SAMESITE = 'lax'
-AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+# The session cookie carries the short-lived access token (15 minutes).
+AUTH_COOKIE_MAX_AGE = 60 * 15
+# The long-lived refresh token is kept in its own httpOnly cookie (7 days).
+AUTH_REFRESH_COOKIE_NAME = 'shenoflow_refresh'
+AUTH_REFRESH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -94,7 +98,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 

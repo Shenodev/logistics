@@ -7,7 +7,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 User = get_user_model()
 
@@ -35,9 +36,36 @@ def set_session_cookie(response, user):
     )
 
 
+def set_refresh_cookie(response, user):
+    token = RefreshToken.for_user(user)
+    response.set_cookie(
+        settings.AUTH_REFRESH_COOKIE_NAME,
+        str(token),
+        max_age=settings.AUTH_REFRESH_COOKIE_MAX_AGE,
+        domain=settings.AUTH_COOKIE_DOMAIN,
+        path='/',
+        secure=settings.AUTH_COOKIE_SECURE,
+        httponly=True,
+        samesite=settings.AUTH_COOKIE_SAMESITE,
+    )
+
+
 def clear_session_cookie(response):
     response.set_cookie(
         settings.AUTH_COOKIE_NAME,
+        '',
+        max_age=0,
+        domain=settings.AUTH_COOKIE_DOMAIN,
+        path='/',
+        secure=settings.AUTH_COOKIE_SECURE,
+        httponly=True,
+        samesite=settings.AUTH_COOKIE_SAMESITE,
+    )
+
+
+def clear_refresh_cookie(response):
+    response.set_cookie(
+        settings.AUTH_REFRESH_COOKIE_NAME,
         '',
         max_age=0,
         domain=settings.AUTH_COOKIE_DOMAIN,
@@ -69,6 +97,7 @@ def login_view(request):
 
     response = Response({'user': user_payload(user)})
     set_session_cookie(response, user)
+    set_refresh_cookie(response, user)
     return response
 
 
@@ -115,6 +144,7 @@ def signup_view(request):
 
     response = Response({'user': user_payload(user)}, status=status.HTTP_201_CREATED)
     set_session_cookie(response, user)
+    set_refresh_cookie(response, user)
     return response
 
 
@@ -125,7 +155,33 @@ def me_view(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+def refresh_view(request):
+    raw_token = request.COOKIES.get(settings.AUTH_REFRESH_COOKIE_NAME)
+    if not raw_token:
+        return Response(
+            {'statusMessage': 'Refresh token missing'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    try:
+        refresh = RefreshToken(raw_token)
+        user = User.objects.get(pk=refresh['user_id'])
+    except (TokenError, TypeError, KeyError, User.DoesNotExist):
+        return Response(
+            {'statusMessage': 'Refresh session expired, please sign in again'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    response = Response({'ok': True})
+    set_session_cookie(response, user)
+    set_refresh_cookie(response, user)
+    return response
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def logout_view(request):
     response = Response({'ok': True})
     clear_session_cookie(response)
+    clear_refresh_cookie(response)
     return response
