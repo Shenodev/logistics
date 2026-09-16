@@ -1,8 +1,5 @@
 <template>
-  <AuthShell
-    title="Sign in to ShenoFlow"
-    :description="isAdminHost ? 'Dispatcher / Admin access' : 'Customer portal access'"
-  >
+  <AuthShell :title="portalMeta.title" :description="portalMeta.description">
     <form @submit="onSubmit" novalidate class="space-y-5">
       <FormField v-slot="{ componentField }" name="email">
         <FormItem>
@@ -46,21 +43,26 @@
       <Button type="submit" class="w-full" :disabled="auth.isPending">
         {{ auth.isPending ? 'Signing in…' : 'Sign in' }}
       </Button>
-      <p class="text-center text-xs text-muted-foreground">
+      <p v-if="portalMeta.devHint" class="text-center text-xs text-muted-foreground">
         Dev demo:
-        <code class="text-cyan-300">{{ devHint }}</code>
+        <code class="text-cyan-300">{{ portalMeta.devHint }}</code>
       </p>
     </form>
 
     <template #footer>
-      <div class="flex items-center gap-3">
-        <Separator class="flex-1 bg-border" />
-        <span class="text-xs text-muted-foreground">or</span>
-        <Separator class="flex-1 bg-border" />
-      </div>
-      <Button variant="outline" class="w-full" as-child>
-        <NuxtLink to="/signup">Create an account</NuxtLink>
-      </Button>
+      <template v-if="portalMeta.showSignup">
+        <div class="flex items-center gap-3">
+          <Separator class="flex-1 bg-border" />
+          <span class="text-xs text-muted-foreground">or</span>
+          <Separator class="flex-1 bg-border" />
+        </div>
+        <Button variant="outline" class="w-full" as-child>
+          <NuxtLink to="/signup">New driver? Create an account</NuxtLink>
+        </Button>
+      </template>
+      <p v-else-if="portalMeta.footerNote" class="text-center text-xs text-muted-foreground">
+        {{ portalMeta.footerNote }}
+      </p>
     </template>
   </AuthShell>
 </template>
@@ -73,13 +75,52 @@ import { useForm } from 'vee-validate'
 definePageMeta({ layout: false, middleware: 'guest' })
 
 const route = useRoute()
-const isAdminHost = useAppRole() === 'admin'
+const auth = useAuthStore()
+const portal = useAppRole()
+
+const portalMeta = computed(() => {
+  switch (portal) {
+    case 'admin':
+      return {
+        title: 'Sign in to Command Center',
+        description: 'Dispatcher / Admin access',
+        seoTitle: 'Dispatcher sign in',
+        devHint: 'admin@sheno.dev / admin123',
+        showSignup: false,
+        footerNote: 'Admin access is provisioned by Sheno fleet operations.',
+      }
+    case 'delivery':
+      return {
+        title: 'Driver sign in',
+        description: 'Driver access to the Sheno delivery network',
+        seoTitle: 'Driver sign in',
+        devHint: '',
+        showSignup: true,
+        footerNote: '',
+      }
+    default:
+      return {
+        title: 'Sign in to ShenoFlow',
+        description: 'Customer portal access',
+        seoTitle: 'Sign in',
+        devHint: 'user@sheno.dev / user123',
+        showSignup: false,
+        footerNote: 'Portal access is provisioned by your shipper organization.',
+      }
+  }
+})
+
+const destination = computed(() => {
+  const redirect = typeof route.query.redirect === 'string' && isSafeRedirect(route.query.redirect)
+    ? route.query.redirect
+    : ''
+  return redirect || (portal === 'admin' ? '/admin' : '/')
+})
 
 useSeoMeta({
-  title: `${isAdminHost ? 'Dispatcher sign in' : 'Sign in'}`,
-  description: 'Sign in to the ShenoFlow logistics portal to manage shipments, fleet, and dispatch.',
+  title: computed(() => portalMeta.value.seoTitle),
+  description: 'Sign in to the ShenoFlow logistics network.',
 })
-const auth = useAuthStore()
 
 const loginSchema = toTypedSchema(
   z.object({
@@ -97,12 +138,10 @@ const { handleSubmit } = useForm({
   initialValues: { email: '', password: '' },
 })
 
-const devHint = isAdminHost ? 'admin@sheno.dev / admin123' : 'user@sheno.dev / user123'
-
 const onSubmit = handleSubmit(async ({ email, password }) => {
   try {
     await auth.login({ email, password })
-    await navigateTo(safeRedirectTarget(route.query.redirect))
+    await navigateTo(destination.value)
   }
   catch {
     // error surfaced via auth.loginError

@@ -1,7 +1,7 @@
 <template>
   <AuthShell
-    title="Create your account"
-    description="Join the ShenoFlow network and start moving freight."
+    title="Create your driver account"
+    description="Join the ShenoFlow delivery network and start accepting orders."
   >
     <form @submit="onSubmit" novalidate class="space-y-5">
       <FormField v-slot="{ componentField }" name="name">
@@ -11,7 +11,7 @@
             <Input
               v-bind="componentField"
               type="text"
-              placeholder="Jane Shipper"
+              placeholder="Driver Name"
               autocomplete="name"
               class="bg-secondary border-border"
             />
@@ -104,7 +104,7 @@
 
     <template #footer>
       <p class="text-center text-sm text-muted-foreground">
-        Already have an account?
+        Already a driver?
         <NuxtLink to="/login" class="font-medium text-primary hover:underline">Sign in</NuxtLink>
       </p>
     </template>
@@ -116,11 +116,11 @@ import * as z from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 
-definePageMeta({ layout: false, middleware: 'guest' })
+definePageMeta({ layout: false, middleware: ['guest', 'delivery-signup'] })
 
 useSeoMeta({
-  title: 'Create account',
-  description: 'Create a ShenoFlow account to start moving freight on the Sheno B2B logistics network.',
+  title: 'Driver sign up',
+  description: 'Create a driver account for the ShenoFlow delivery network.',
 })
 
 const auth = useAuthStore()
