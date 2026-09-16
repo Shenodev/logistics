@@ -4,6 +4,11 @@ const route = useRoute()
 const router = useRouter()
 
 const searchQuery = ref('')
+const mobileOpen = ref(false)
+
+watch(() => route.fullPath, () => {
+  mobileOpen.value = false
+})
 
 const initials = computed(() => {
   const name = auth.user?.name?.trim() || 'Sh'
@@ -46,7 +51,16 @@ async function logout() {
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <aside class="fixed top-0 left-0 z-40 flex h-screen w-64 flex-col justify-between border-r border-sidebar-border bg-surface-low">
+    <div
+      v-if="mobileOpen"
+      class="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden"
+      aria-hidden="true"
+      @click="mobileOpen = false"
+    />
+    <aside
+      class="fixed top-0 left-0 z-40 flex h-screen w-64 flex-col justify-between border-r border-sidebar-border bg-surface-low transition-transform duration-200 ease-in-out lg:translate-x-0"
+      :class="mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+    >
       <div class="flex h-full flex-col justify-between p-4">
         <div>
           <div class="mb-6 flex items-center gap-2 px-1 py-2">
@@ -133,13 +147,21 @@ async function logout() {
       </div>
     </aside>
 
-    <header class="fixed top-0 right-0 left-64 z-30 flex h-16 items-center justify-between border-b border-outline-variant bg-surface-low px-6">
-      <div class="flex max-w-xl flex-1 items-center gap-4">
-        <div class="relative w-full">
+    <header class="fixed top-0 right-0 left-0 z-20 flex h-16 items-center justify-between border-b border-outline-variant bg-surface-low px-4 lg:left-64 lg:px-6">
+      <div class="flex min-w-0 flex-1 items-center gap-3 lg:max-w-xl">
+        <button
+          class="rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary lg:hidden"
+          title="Open menu"
+          aria-label="Open navigation menu"
+          @click="mobileOpen = true"
+        >
+          <MIcon name="menu" class="text-[22px]" />
+        </button>
+        <div class="relative min-w-0 flex-1">
           <MIcon name="search" class="absolute top-1/2 left-3 -translate-y-1/2 text-[18px] text-outline" />
           <input
             v-model="searchQuery"
-            class="w-full rounded-lg border border-outline-variant bg-surface py-1.5 pr-4 pl-9 font-body-md text-body-md text-on-surface transition-colors placeholder:text-outline focus:border-primary focus:outline-none"
+            class="w-full min-w-0 rounded-lg border border-outline-variant bg-surface py-1.5 pr-4 pl-9 font-body-md text-body-md text-on-surface transition-colors placeholder:text-outline focus:border-primary focus:outline-none"
             type="text"
             placeholder="Search shipments, vessels, manifests..."
             @keyup.enter="submitSearch"
@@ -151,13 +173,13 @@ async function logout() {
         <button class="rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" title="Notifications">
           <MIcon name="notifications" class="text-[20px]" />
         </button>
-        <NuxtLink to="/profile" class="rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" title="Help">
+        <NuxtLink to="/profile" class="hidden rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary sm:inline-flex" title="Help">
           <MIcon name="help_outline" class="text-[20px]" />
         </NuxtLink>
-        <div class="hidden h-5 w-px bg-outline-variant" />
+        <div class="hidden h-5 w-px bg-outline-variant lg:block" />
         <span class="hidden text-label-md text-on-surface-variant lg:inline-block">Shipper Enterprise Portal</span>
         <Button
-          class="flex items-center gap-1 rounded-lg bg-secondary-container px-4 py-1.5 font-label-md font-semibold text-on-secondary-container transition-colors hover:bg-secondary-container hover:opacity-90"
+          class="hidden items-center gap-1 rounded-lg bg-secondary-container px-4 py-1.5 font-label-md font-semibold text-on-secondary-container transition-colors hover:bg-secondary-container hover:opacity-90 sm:flex"
           size="sm"
           as-child
         >
@@ -169,7 +191,7 @@ async function logout() {
       </div>
     </header>
 
-    <div class="ml-64 min-h-screen pt-16">
+    <div class="min-h-screen pt-16 lg:ml-64">
       <slot />
 
       <footer class="py-4 text-center text-xs text-muted-foreground">

@@ -75,7 +75,7 @@
               type="checkbox"
               :checked="value"
               class="h-4 w-4 rounded border-border bg-secondary accent-cyan-500"
-              @change="handleChange"
+              @change="handleChange(($event.target as HTMLInputElement).checked)"
             />
           </FormControl>
           <div class="space-y-1">
