@@ -9,7 +9,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo({ path: '/login', query: redirectQuery(to.fullPath) })
   }
 
-  if (!auth.isAdmin) {
+  if (!auth.isDriver) {
     return navigateTo(usePortalBaseUrl(auth.portal), { external: true })
   }
 })

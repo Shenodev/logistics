@@ -122,10 +122,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async hydrate() {
-      if (this.status !== 'idle') return
+      const inFlight = hydrateTasks.get(this)
+      if (inFlight) return inFlight
 
-      const existing = hydrateTasks.get(this)
-      if (existing) return existing
+      if (this.status === 'authenticated' || this.status === 'unauthenticated') return
 
       this.status = 'pending'
       const task = this._hydrate()

@@ -3,9 +3,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (auth.status === 'idle') {
     await auth.hydrate()
-    if (!auth.isAuthenticated) {
-      const refreshed = await auth.tryRefresh()
-      if (refreshed) await auth.hydrate()
+  }
+
+  if (!auth.isAuthenticated) {
+    const refreshed = await auth.tryRefresh()
+    if (refreshed) {
+      await auth.hydrate()
     }
   }
 

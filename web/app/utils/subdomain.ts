@@ -80,6 +80,26 @@ export function useRuntimePortalConfig(): PortalConfig {
   }
 }
 
+export function portalHost(portal: AppPortal, config: PortalConfig): string {
+  switch (portal) {
+    case 'admin':
+      return normalizeHost(`${config.adminSubdomain}.${config.appDomain}`)
+    case 'delivery':
+      return normalizeHost(`${config.deliverySubdomain}.${config.appDomain}`)
+    default:
+      return normalizeHost(config.appDomain)
+  }
+}
+
+export function portalBaseUrl(portal: AppPortal, config: PortalConfig): string {
+  const host = portalHost(portal, config)
+  return host ? `https://${host}` : ''
+}
+
+export function usePortalBaseUrl(portal: AppPortal): string {
+  return portalBaseUrl(portal, useRuntimePortalConfig())
+}
+
 export function useAppRole(): AppPortal {
   const requestUrl = useRequestURL()
   return portalFromHost(requestUrl?.host, useRuntimePortalConfig())
