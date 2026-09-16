@@ -1,4 +1,16 @@
-export type ShipmentStatus = 'booked' | 'in_transit' | 'out_for_delivery' | 'delivered'
+export type ShipmentStatus = 'order_received' | 'booked' | 'in_transit' | 'out_for_delivery' | 'delivered'
+
+/**
+ * Stage 1 canonical status is `order_received` ("Order Received" / "استلام الطلب").
+ * `booked` is kept as a legacy alias for backward compatibility — both map to Stage 1.
+ */
+export function isCancellableStatus(status: ShipmentStatus): boolean {
+  return status === 'order_received' || status === 'booked'
+}
+
+export function canCancelOrder(shipment: { status: ShipmentStatus }): boolean {
+  return isCancellableStatus(shipment.status)
+}
 
 export interface Milestone {
   label: string
@@ -60,14 +72,15 @@ export interface Shipment {
 }
 
 export const STATUS_FLOW: Record<ShipmentStatus, { label: string; index: number }> = {
-  booked: { label: 'Booked', index: 0 },
+  order_received: { label: 'Order Received', index: 0 },
+  booked: { label: 'Order Received', index: 0 },
   in_transit: { label: 'In Transit', index: 2 },
   out_for_delivery: { label: 'Out for Delivery', index: 3 },
   delivered: { label: 'Delivered', index: 4 },
 }
 
 const STEP_LABELS = [
-  { label: 'Order Placed', icon: 'check' },
+  { label: 'Order Received', icon: 'receipt_long' },
   { label: 'Picked Up & Origin Hub', icon: 'check' },
   { label: 'In Transit', icon: 'airplanemode_active' },
   { label: 'Out for Delivery', icon: 'local_shipping' },
@@ -75,6 +88,10 @@ const STEP_LABELS = [
 ]
 
 const STEP_DETAILS: Record<ShipmentStatus, { detail: string[]; time: string[] }> = {
+  order_received: {
+    detail: ['Booking Confirmed', 'Carrier Assigned', 'Expected Soon', 'Upcoming', 'Consignee Sign-off'],
+    time: ['Oct 24 • 14:32', 'Oct 25 • 08:15', 'Est. Oct 28', 'Est. Oct 29 • 09:00', 'Est. Oct 29 • 16:30'],
+  },
   booked: {
     detail: ['Booking Confirmed', 'Carrier Assigned', 'Expected Soon', 'Upcoming', 'Consignee Sign-off'],
     time: ['Oct 24 • 14:32', 'Oct 25 • 08:15', 'Est. Oct 28', 'Est. Oct 29 • 09:00', 'Est. Oct 29 • 16:30'],
@@ -100,7 +117,7 @@ function milestonesFor(status: ShipmentStatus): Milestone[] {
     icon: step.icon,
     detail: STEP_DETAILS[status].detail[i],
     time: STEP_DETAILS[status].time[i],
-    state: i < idx ? 'done' : i === idx ? (status === 'booked' && i === 0 ? 'active' : 'active') : 'upcoming',
+    state: i < idx ? 'done' : i === idx ? 'active' : 'upcoming',
   }))
 }
 
@@ -213,6 +230,37 @@ function buildShipment(seed: ShipmentSeed): Shipment {
 }
 
 export const shipments: Shipment[] = [
+  buildShipment({
+    id: 'SHP-10001-ORD',
+    mode: 'Ocean Freight',
+    status: 'order_received',
+    priority: 'Standard Freight',
+    origin: 'Rotterdam',
+    originCode: 'RTM',
+    destination: 'Chicago',
+    destinationCode: 'ORD',
+    carrier: 'Carrier assignment pending',
+    eta: 'TBD — awaiting carrier confirmation',
+    nextCheckpoint: 'Order Received — awaiting pickup',
+    nextCheckpointIn: 'TBD',
+    grossWeight: '12,400 kg',
+    grossWeightLbs: '27,337 lbs',
+    totalVolume: '62.0 m³',
+    totalVolumeCu: '2,189 cu ft',
+    pallets: '18 Units',
+    palletType: 'Euro Pallets (EPAL 1)',
+    containerSpec: '40ft HC',
+    containerSpecDetail: 'High Cube Intermodal',
+    dimensions: "12.19m × 2.44m × 2.89m (40'0\" × 8'0\" × 9'6\")",
+    tare: '3,980 kg (Standard Cor-Ten Steel)',
+    hsCode: '8542.31',
+    hsDesc: 'Electronic Integrated Circuits (Processors & Controllers)',
+    consigneeName: 'Apex Global Distribution Center, Bay 14',
+    consigneeAddress: '1040 Logistics Blvd, Bensenville, IL 60106, United States',
+    receiver: 'Robert Chen',
+    receiverRole: 'Lead Logistics Manager',
+    receiverBadge: 'APX-9941',
+  }),
   buildShipment({
     id: 'SHP-89421-US',
     mode: 'Ocean Freight',
@@ -416,7 +464,7 @@ export interface NewShipmentInput {
 
 export function createBookedShipment(input: NewShipmentInput): Shipment {
   const base = shipments[0]
-  const status: ShipmentStatus = 'booked'
+  const status: ShipmentStatus = 'order_received'
   const rand = Math.floor(10000 + Math.random() * 89999)
   const destinationCode = input.destination.trim().slice(0, 3).toUpperCase() || 'DST'
   const weightKg = parseInt(input.grossWeight.replace(/\D/g, ''), 10) || 1000

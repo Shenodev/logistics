@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { STATUS_FLOW } from '~~/app/data/shipments'
+import { canCancelOrder, STATUS_FLOW } from '~~/app/data/shipments'
 
 definePageMeta({ layout: 'user', middleware: 'auth' })
 
 const route = useRoute()
-const { get: findShipment } = useShipments()
+const router = useRouter()
+const { get: findShipment, cancelOrder } = useShipments()
 
 const shipment = computed(() => findShipment(String(route.params.id ?? '')))
 
@@ -17,13 +18,51 @@ useSeoMeta({
 
 const statusLabel = computed(() => shipment.value ? STATUS_FLOW[shipment.value.status].label : '')
 
-const activeIndex = computed(() => (shipment.value ? STATUS_FLOW[shipment.value.status].index : 0))
+// Vue conditional rendering: only Stage 1 "Order Received" is cancellable
+const canCancel = computed(() => shipment.value ? canCancelOrder(shipment.value) : false)
+
+const showCancelConfirm = ref(false)
+const cancelling = ref(false)
+const cancelSuccess = ref(false)
+
+function requestCancel() {
+  showCancelConfirm.value = true
+}
+
+function closeCancelDialog() {
+  if (cancelling.value) return
+  showCancelConfirm.value = false
+}
+
+async function confirmCancel() {
+  if (!shipment.value || cancelling.value) return
+  cancelling.value = true
+  // Simulate async cancellation (would be Stripe refund flag on backend)
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  cancelOrder(shipment.value.id)
+  cancelling.value = false
+  showCancelConfirm.value = false
+  cancelSuccess.value = true
+  // Brief success state then redirect to shipments list
+  setTimeout(() => {
+    router.push('/shipments')
+  }, 900)
+}
 </script>
 
 <template>
   <main class="bg-background">
     <template v-if="shipment">
       <div class="mx-auto max-w-[1600px] space-y-6 p-6">
+        <!-- Cancel success banner (v-if conditional rendering) -->
+        <div
+          v-if="cancelSuccess"
+          class="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-body-sm text-emerald-400"
+        >
+          <MIcon name="check_circle" class="text-[18px]" />
+          <span class="font-medium">Order cancelled — flagged for Visa refund via Stripe. Redirecting…</span>
+        </div>
+
         <!-- 1. Title & metadata -->
         <section class="rounded-xl border border-outline-variant bg-surface-container p-4">
           <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
@@ -62,7 +101,14 @@ const activeIndex = computed(() => (shipment.value ? STATUS_FLOW[shipment.value.
               </div>
             </div>
 
-            <div class="flex items-center gap-2 self-start lg:self-center">
+            <div class="flex flex-wrap items-center gap-2 self-start lg:self-center">
+              <!-- CRITICAL: Cancel Order — Vue conditional rendering (v-if) — only Stage 1 "Order Received" -->
+              <ShipmentCancelOrderButton
+                v-if="canCancel"
+                :shipment="shipment"
+                :loading="cancelling"
+                @cancel="requestCancel"
+              />
               <button class="flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-low px-3 py-2 text-label-md text-on-surface transition-colors hover:border-primary hover:bg-surface-container-high active:scale-[0.98]">
                 <MIcon name="picture_as_pdf" class="text-[18px] text-primary" />
                 <span>Download Waybill (PDF)</span>
@@ -78,6 +124,45 @@ const activeIndex = computed(() => (shipment.value ? STATUS_FLOW[shipment.value.
             </div>
           </div>
         </section>
+
+        <!-- Cancel confirmation dialog (conditional rendering with v-if) -->
+        <div
+          v-if="showCancelConfirm"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          @click.self="closeCancelDialog"
+        >
+          <div class="w-full max-w-md rounded-xl border border-outline-variant bg-surface-container p-6 shadow-xl">
+            <div class="flex items-start gap-3">
+              <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                <MIcon name="warning" class="text-[22px]" />
+              </div>
+              <div>
+                <h3 class="font-heading text-headline-sm font-semibold text-on-surface">Cancel order {{ shipment.id }}?</h3>
+                <p class="mt-1 text-body-sm leading-relaxed text-on-surface-variant">
+                  This order is still in <strong class="text-on-surface">Order Received</strong> (Stage 1) and can be cancelled. A refund will be flagged for processing back to your Visa via Stripe. This action cannot be undone after carrier pickup.
+                </p>
+              </div>
+            </div>
+            <div class="mt-6 flex items-center justify-end gap-2">
+              <button
+                class="rounded-lg px-4 py-2 text-label-md font-medium text-on-surface-variant hover:bg-surface-container-high"
+                :disabled="cancelling"
+                @click="closeCancelDialog"
+              >
+                Keep order
+              </button>
+              <button
+                class="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-4 py-2 text-label-md font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
+                :disabled="cancelling"
+                @click="confirmCancel"
+              >
+                <MIcon v-if="!cancelling" name="cancel" class="text-[16px]" />
+                <span>{{ cancelling ? 'Cancelling…' : 'Confirm cancel' }}</span>
+              </button>
+            </div>
+            <p class="mt-3 text-label-sm text-outline">Refund issued via Stripe to original Visa • Stage 1 only</p>
+          </div>
+        </div>
 
         <!-- 2. Live telemetry map -->
         <section class="relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container">
@@ -159,56 +244,8 @@ const activeIndex = computed(() => (shipment.value ? STATUS_FLOW[shipment.value.
           </div>
         </section>
 
-        <!-- 3. Milestone timeline -->
-        <section class="rounded-xl border border-outline-variant bg-surface-container p-6">
-          <div class="mb-6 flex items-center justify-between">
-            <div>
-              <h2 class="font-heading text-headline-sm font-semibold text-on-surface">Consignment Progress &amp; Chain of Custody</h2>
-              <p class="mt-0.5 text-body-sm text-on-surface-variant">Automated timestamp verification recorded on carrier ledger</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="rounded border border-outline-variant bg-surface-container-high px-2.5 py-1 text-label-sm text-on-surface-variant">
-                Current Phase: <strong class="font-medium text-primary">{{ shipment.currentPhase }}</strong>
-              </span>
-            </div>
-          </div>
-
-          <div class="relative py-2">
-            <div class="absolute top-[26px] right-[5%] left-[5%] z-0 h-0.5 -translate-y-1/2 bg-outline-variant">
-              <div class="h-full bg-primary" :style="{ width: `${shipment.timelineFillPct}%` }" />
-            </div>
-
-            <div class="relative z-10 grid grid-cols-5 gap-2 text-center">
-              <div
-                v-for="milestone in shipment.milestones"
-                :key="milestone.label"
-                class="flex flex-col items-center"
-                :class="milestone.state === 'upcoming' ? 'opacity-40' : milestone.state === 'active' ? '' : 'opacity-100'"
-              >
-                <div v-if="milestone.state === 'active'" class="relative mb-2">
-                  <div class="flex size-12 items-center justify-center rounded-full border-2 border-primary bg-primary-container font-bold text-on-primary-container">
-                    <MIcon :name="milestone.icon" class="text-[24px]" />
-                  </div>
-                  <span class="radar-pulse pointer-events-none absolute -inset-1 rounded-full border border-primary" />
-                </div>
-                <div
-                  v-else
-                  class="mb-2 flex size-12 items-center justify-center rounded-full border-2 bg-surface-container-highest"
-                  :class="milestone.state === 'done' ? 'border-primary text-primary' : 'border-outline-variant bg-surface-low text-outline'"
-                >
-                  <MIcon :name="milestone.icon" class="text-[22px]" />
-                </div>
-                <div class="text-label-md font-semibold" :class="milestone.state === 'active' ? 'font-bold text-primary' : 'text-on-surface'">
-                  {{ milestone.label }}
-                </div>
-                <div class="mt-0.5 text-body-sm" :class="milestone.state === 'active' ? 'font-medium text-on-surface' : 'text-on-surface-variant'">
-                  {{ milestone.detail }}
-                </div>
-                <div class="mt-0.5 font-mono text-label-sm text-outline">{{ milestone.time }}</div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <!-- 3. Milestone timeline (extracted Vue component) -->
+        <ShipmentMilestoneTimeline :shipment="shipment" />
 
         <!-- 4. Cargo details & POD -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

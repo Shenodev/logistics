@@ -24,13 +24,15 @@ const filteredList = computed(() => {
 
 const statusTabs: Array<{ key: 'all' | ShipmentStatus; label: string }> = [
   { key: 'all', label: 'All' },
+  { key: 'order_received', label: 'Order Received' },
   { key: 'in_transit', label: 'In Transit' },
   { key: 'out_for_delivery', label: 'Out for Delivery' },
-  { key: 'booked', label: 'Booked' },
+  { key: 'booked', label: 'Order Received' },
   { key: 'delivered', label: 'Delivered' },
 ]
 
 const badgeTone: Record<ShipmentStatus, string> = {
+  order_received: 'border-outline-variant bg-surface-container-high text-on-surface-variant',
   booked: 'border-outline-variant bg-surface-container-high text-on-surface-variant',
   in_transit: 'border-primary/30 bg-primary-container/10 text-primary',
   out_for_delivery: 'border-tertiary-container/30 bg-tertiary-container/15 text-tertiary',

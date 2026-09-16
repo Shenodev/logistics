@@ -16,5 +16,19 @@ export function useShipments() {
     state.items.unshift(shipment)
   }
 
-  return { list, get, add }
+  function remove(id: string): boolean {
+    const key = id.trim().toUpperCase()
+    const idx = state.items.findIndex((item) => item.id === key)
+    if (idx === -1) return false
+    state.items.splice(idx, 1)
+    return true
+  }
+
+  function cancelOrder(id: string): boolean {
+    // Business rule: cancellation is only a soft remove in UI;
+    // backend would flag for Stripe refund. Here we remove from the reactive list.
+    return remove(id)
+  }
+
+  return { list, get, add, remove, cancelOrder }
 }
