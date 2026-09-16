@@ -11,6 +11,15 @@ export default defineNuxtConfig({
       meta: [
         { name: 'description', content: 'ShenoFlow — B2B logistics portal for fleet, dispatch, and shipment tracking.' },
       ],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/png', sizes: '48x48', href: '/favicon-48x48.png' },
+        { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png' },
+        { rel: 'icon', type: 'image/png', sizes: '144x144', href: '/favicon-144x144.png' },
+        { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/favicon-192x192.png' },
+        { rel: 'icon', type: 'image/png', sizes: '512x512', href: '/favicon-512x512.png' },
+        { rel: 'apple-touch-icon', sizes: '192x192', href: '/favicon-192x192.png' },
+      ],
     },
   },
   modules: ['shadcn-nuxt', '@pinia/nuxt'],
