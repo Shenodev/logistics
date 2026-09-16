@@ -77,17 +77,7 @@ async function logout() {
             </div>
           </div>
 
-          <Button
-            class="mb-6 w-full items-center justify-center gap-1 rounded-lg bg-primary-container py-2.5 font-label-md font-semibold text-on-primary-container transition-colors duration-150 hover:bg-primary active:scale-[0.98]"
-            as-child
-          >
-            <NuxtLink to="/shipments">
-              <MIcon name="add" class="text-[18px]" />
-              <span>New Shipment</span>
-            </NuxtLink>
-          </Button>
-
-          <nav class="space-y-1">
+          <nav class="mb-6 space-y-1">
             <NuxtLink
               v-for="item in nav"
               :key="item.to"
@@ -178,16 +168,6 @@ async function logout() {
         </NuxtLink>
         <div class="hidden h-5 w-px bg-outline-variant lg:block" />
         <span class="hidden text-label-md text-on-surface-variant lg:inline-block">Shipper Enterprise Portal</span>
-        <Button
-          class="hidden items-center gap-1 rounded-lg bg-secondary-container px-4 py-1.5 font-label-md font-semibold text-on-secondary-container transition-colors hover:bg-secondary-container hover:opacity-90 sm:flex"
-          size="sm"
-          as-child
-        >
-          <NuxtLink to="/shipments">
-            <MIcon name="add_circle" class="text-[16px]" />
-            <span>Create Booking</span>
-          </NuxtLink>
-        </Button>
       </div>
     </header>
 
