@@ -42,7 +42,7 @@
   --font-label-sm: "Inter", var(--font-sans);
   --font-telemetry-numeric: "Inter", var(--font-sans);
 
-  /* Material-3 surface tokens (reference palette) */
+  /* Stitch UI surface tokens (deep slate / electric cyan) */
   --color-surface: var(--surface);
   --color-surface-low: var(--surface-low);
   --color-surface-container: var(--surface-container);
@@ -121,61 +121,61 @@
 :root {
   --radius: 0.5rem;
 
-  /* Material-3 dark · Aether/ShenoFlow reference palette */
-  --background: #0b1326;
-  --foreground: #dae2fd;
-  --card: #171f33;
-  --card-foreground: #dae2fd;
-  --popover: #222a3d;
-  --popover-foreground: #dae2fd;
-  --primary: #4cd7f6;
-  --primary-foreground: #003640;
-  --secondary: #004fef;
-  --secondary-foreground: #d4dbff;
-  --muted: #131b2e;
-  --muted-foreground: #bcc9cd;
-  --accent: #222a3d;
-  --accent-foreground: #dae2fd;
-  --destructive: #ffb4ab;
-  --destructive-foreground: #690005;
-  --border: #3d494c;
-  --input: #3d494c;
-  --ring: #4cd7f6;
-  --chart-1: #4cd7f6;
-  --chart-2: #06b6d4;
-  --chart-3: #b6c4ff;
-  --chart-4: #ffb873;
-  --chart-5: #004fef;
-  --sidebar: #131b2e;
-  --sidebar-foreground: #dae2fd;
-  --sidebar-primary: #4cd7f6;
-  --sidebar-primary-foreground: #003640;
-  --sidebar-accent: #222a3d;
-  --sidebar-accent-foreground: #dae2fd;
-  --sidebar-border: #3d494c;
-  --sidebar-ring: #4cd7f6;
+  /* Stitch UI · Deep Slate + Electric Cyan */
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+  --card: #1e293b;
+  --card-foreground: #e2e8f0;
+  --popover: #1e293b;
+  --popover-foreground: #e2e8f0;
+  --primary: #06b6d4;
+  --primary-foreground: #083344;
+  --secondary: #0891b2;
+  --secondary-foreground: #ecfeff;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #e2e8f0;
+  --destructive: #f87171;
+  --destructive-foreground: #450a0a;
+  --border: #334155;
+  --input: #334155;
+  --ring: #06b6d4;
+  --chart-1: #06b6d4;
+  --chart-2: #0891b2;
+  --chart-3: #67e8f9;
+  --chart-4: #94a3b8;
+  --chart-5: #334155;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: #06b6d4;
+  --sidebar-primary-foreground: #083344;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #e2e8f0;
+  --sidebar-border: #334155;
+  --sidebar-ring: #06b6d4;
 
-  /* Material-3 extended surfaces */
-  --surface: #0b1326;
-  --surface-low: #131b2e;
-  --surface-lowest: #060e20;
-  --surface-container: #171f33;
-  --surface-high: #222a3d;
-  --surface-highest: #2d3449;
-  --surface-bright: #31394d;
-  --on-surface: #dae2fd;
-  --on-surface-variant: #bcc9cd;
-  --outline: #869397;
-  --outline-variant: #3d494c;
-  --tertiary: #ffb873;
-  --tertiary-container: #e89337;
-  --on-tertiary-container: #5b3200;
+  /* Stitch UI extended surfaces */
+  --surface: #0f172a;
+  --surface-low: #111b2f;
+  --surface-lowest: #020617;
+  --surface-container: #1e293b;
+  --surface-high: #263449;
+  --surface-highest: #334155;
+  --surface-bright: #3b4a63;
+  --on-surface: #e2e8f0;
+  --on-surface-variant: #94a3b8;
+  --outline: #64748b;
+  --outline-variant: #334155;
+  --tertiary: #67e8f9;
+  --tertiary-container: #164e63;
+  --on-tertiary-container: #cffafe;
   --primary-container: #06b6d4;
-  --on-primary-container: #00424f;
-  --on-primary: #003640;
-  --secondary-container: #004fef;
-  --on-secondary-container: #d4dbff;
-  --inverse-surface: #dae2fd;
+  --on-primary-container: #083344;
+  --on-primary: #083344;
+  --secondary-container: #164e63;
+  --on-secondary-container: #a5f3fc;
+  --inverse-surface: #e2e8f0;
 }
 
 @theme inline {
