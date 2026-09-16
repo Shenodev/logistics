@@ -1,11 +1,8 @@
 export default defineNuxtRouteMiddleware(async (to) => {
   if (to.path === '/login' || to.path === '/signup') return
 
-  const { hostname } = useRequestURL()
   const role = useAppRole()
-  const layout = role === 'admin' ? 'admin' : 'user'
-
-  setPageLayout(layout)
+  setPageLayout(portalToLayout(role))
 
   if (role !== 'admin' || to.path === '/login') return
 
@@ -21,6 +18,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (!auth.isAdmin) {
     const appDomain = String(useRuntimeConfig().public.appDomain)
+    const hostname = useRequestURL().hostname
     if (hostname !== appDomain) {
       return navigateTo(`https://${appDomain}/`, { external: true })
     }

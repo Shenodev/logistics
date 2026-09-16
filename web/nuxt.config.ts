@@ -88,6 +88,7 @@ export default defineNuxtConfig({
     public: {
       appDomain: 'logistics.shenodev.tech',
       adminSubdomain: 'admin',
+      deliverySubdomain: 'delivery',
       apiBase: 'https://api.logistics.shenodev.tech',
       siteUrl: 'https://logistics.shenodev.tech',
       stripePk: '',
@@ -98,7 +99,7 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
     server: {
-      allowedHosts: ['logistics.shenodev.tech', 'admin.logistics.shenodev.tech', '.shenodev.tech', 'localhost'],
+      allowedHosts: ['logistics.shenodev.tech', 'admin.logistics.shenodev.tech', 'delivery.logistics.shenodev.tech', '.shenodev.tech', 'localhost'],
     },
   },
 })
