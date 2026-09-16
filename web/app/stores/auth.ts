@@ -3,11 +3,13 @@ import {
   type LoginCredentials,
   type LoginResponse,
   type LogoutResponse,
+  type SessionRole,
   type SessionUser,
   type SignupCredentials,
 } from '~~/shared/auth'
 
 export type AuthStatus = 'idle' | 'pending' | 'authenticated' | 'unauthenticated'
+export type AuthPortal = 'user' | 'admin' | 'delivery'
 
 interface AuthState {
   user: SessionUser | null
@@ -33,6 +35,14 @@ function getAuthErrorMessage(error: unknown): string {
   return 'Authentication failed'
 }
 
+function portalForRole(role: SessionRole | null | undefined): AuthPortal {
+  if (role === 'admin') return 'admin'
+  if (role === 'driver') return 'delivery'
+  return 'user'
+}
+
+const hydrateTasks = new WeakMap<object, Promise<void>>()
+
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
@@ -46,6 +56,8 @@ export const useAuthStore = defineStore('auth', {
     role: (state) => state.user?.role ?? null,
     isAdmin: (state) => state.user?.role === 'admin',
     isUser: (state) => state.user?.role === 'user',
+    isDriver: (state) => state.user?.role === 'driver',
+    portal: (state): AuthPortal => portalForRole(state.user?.role),
   },
 
   actions: {
@@ -112,8 +124,21 @@ export const useAuthStore = defineStore('auth', {
     async hydrate() {
       if (this.status !== 'idle') return
 
-      this.status = 'pending'
+      const existing = hydrateTasks.get(this)
+      if (existing) return existing
 
+      this.status = 'pending'
+      const task = this._hydrate()
+      hydrateTasks.set(this, task)
+      try {
+        await task
+      }
+      finally {
+        hydrateTasks.delete(this)
+      }
+    },
+
+    async _hydrate() {
       try {
         const { user } = await authRequest<LoginResponse>('/auth/me')
         this.setSession(user)

@@ -1,22 +1,7 @@
 export const SESSION_COOKIE = 'shenoflow_session'
-
-export const SESSION_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'lax' as const,
-  path: '/',
-  maxAge: 60 * 15,
-}
-
 export const REFRESH_COOKIE = 'shenoflow_refresh'
 
-export const REFRESH_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'lax' as const,
-  path: '/',
-  maxAge: 60 * 60 * 24 * 7,
-}
+export type SessionRole = 'user' | 'admin' | 'driver'
 
 export interface LoginCredentials {
   email: string
@@ -33,14 +18,14 @@ export interface SessionUser {
   id: string
   email: string
   name: string
-  role: 'user' | 'admin'
+  role: SessionRole
 }
 
 export interface SessionJwtPayload {
   sub: string
   email: string
   name: string
-  role: 'user' | 'admin'
+  role: SessionRole
   iat: number
   exp: number
 }
