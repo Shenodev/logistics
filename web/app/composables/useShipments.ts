@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import type { Shipment } from '~/data/shipments'
+import type { DeliveryStatus, Shipment } from '~/data/shipments'
 import { shipments as seed } from '~/data/shipments'
 
 const state = reactive<{ items: Shipment[] }>({ items: [...seed] })
@@ -54,5 +54,33 @@ export function useShipments() {
     return { ok: true, refundId }
   }
 
-  return { list, get, remove, cancelOrder, issueRefund }
+  function updateDeliveryStatus(id: string, next: DeliveryStatus): boolean {
+    const key = id.trim().toUpperCase()
+    const item = state.items.find((s) => s.id === key)
+    if (!item) return false
+    // enforce sequential flow: assigned -> picked_up -> on_the_way -> delivered
+    const order: DeliveryStatus[] = ['assigned', 'picked_up', 'on_the_way', 'delivered']
+    const curIdx = order.indexOf(item.deliveryStatus)
+    const nextIdx = order.indexOf(next)
+    if (nextIdx !== curIdx + 1) return false
+    item.deliveryStatus = next
+    item.deliveryUpdatedAt = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' UTC'
+    if (next === 'picked_up') {
+      item.nextCheckpoint = 'Picked Up — en route to customer'
+      item.nextCheckpointIn = 'On the way'
+    } else if (next === 'on_the_way') {
+      item.nextCheckpoint = 'On the way — navigating to dropoff'
+      item.nextCheckpointIn = 'ETA 12 min'
+    } else if (next === 'delivered') {
+      item.status = 'delivered'
+      item.currentPhase = 'Delivered'
+      item.timelineFillPct = 100
+      item.eta = 'Delivered'
+      item.nextCheckpoint = 'Delivered — awaiting customer signature'
+      item.nextCheckpointIn = 'Completed'
+    }
+    return true
+  }
+
+  return { list, get, remove, cancelOrder, issueRefund, updateDeliveryStatus }
 }

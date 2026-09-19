@@ -33,6 +33,8 @@ export interface MapWaypoint {
   kind: 'origin' | 'current' | 'checkpoint' | 'destination'
 }
 
+export type DeliveryStatus = 'assigned' | 'picked_up' | 'on_the_way' | 'delivered'
+
 export interface Shipment {
   id: string
   mode: string
@@ -84,6 +86,12 @@ export interface Shipment {
   refundId?: string | null
   refundAmount?: string
   invoiceId?: string
+  // delivery
+  customerPhone: string
+  restaurantName: string
+  restaurantAddress: string
+  deliveryStatus: DeliveryStatus
+  deliveryUpdatedAt?: string | null
 }
 
 export const STATUS_FLOW: Record<ShipmentStatus, { label: string; index: number }> = {
@@ -196,8 +204,9 @@ const DEFAULT_HANDLING = [
   },
 ]
 
-function buildShipment(seed: ShipmentSeed & Partial<Pick<Shipment, 'cancelledAt' | 'cancelledBy' | 'refundStatus' | 'refundId' | 'refundAmount' | 'invoiceId'>>): Shipment {
+function buildShipment(seed: ShipmentSeed & Partial<Pick<Shipment, 'cancelledAt' | 'cancelledBy' | 'refundStatus' | 'refundId' | 'refundAmount' | 'invoiceId' | 'customerPhone' | 'restaurantName' | 'restaurantAddress' | 'deliveryStatus' | 'deliveryUpdatedAt'>>): Shipment {
   const isCancelled = seed.status === 'cancelled'
+  const digits = seed.id.replace(/\D/g, '').slice(-4).padStart(4, '0') || '0148'
   return {
     id: seed.id,
     mode: seed.mode,
@@ -253,6 +262,11 @@ function buildShipment(seed: ShipmentSeed & Partial<Pick<Shipment, 'cancelledAt'
     refundId: seed.refundId ?? null,
     refundAmount: seed.refundAmount ?? (isCancelled ? '$12,400.00' : '$0.00'),
     invoiceId: seed.invoiceId ?? `INV-2024-${seed.id.slice(-4)}`,
+    customerPhone: seed.customerPhone ?? `+1 (212) 555-${digits}`,
+    restaurantName: seed.restaurantName ?? `${seed.origin} Hub Kitchen`,
+    restaurantAddress: seed.restaurantAddress ?? `${seed.origin}, ${seed.originCode} • Bay ${seed.id.slice(-2)} • Pickup Dock 4`,
+    deliveryStatus: seed.deliveryStatus ?? (isCancelled ? 'assigned' : 'assigned'),
+    deliveryUpdatedAt: seed.deliveryUpdatedAt ?? null,
   }
 }
 
