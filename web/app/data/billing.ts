@@ -1,4 +1,4 @@
-export type InvoiceStatus = 'paid' | 'open' | 'overdue'
+export type InvoiceStatus = 'paid' | 'open' | 'overdue' | 'refunded'
 
 export interface Invoice {
   id: string
@@ -9,14 +9,16 @@ export interface Invoice {
 }
 
 export const invoices: Invoice[] = [
+  { id: 'INV-2024-1195', date: 'Nov 18, 2024', description: 'Ocean Freight · SHP-10001-ORD — Cancelled (Order Received)', amount: '$12,400.00', status: 'refunded' },
   { id: 'INV-2024-1187', date: 'Nov 12, 2024', description: 'Ocean Freight · SHP-89421-US', amount: '$4,820.00', status: 'open' },
   { id: 'INV-2024-1182', date: 'Nov 05, 2024', description: 'Air Cargo · SHP-90214-DE', amount: '$3,150.00', status: 'paid' },
   { id: 'INV-2024-1176', date: 'Oct 29, 2024', description: 'Intermodal · MSKU-993214-4', amount: '$6,740.00', status: 'paid' },
   { id: 'INV-2024-1171', date: 'Oct 22, 2024', description: 'Ground Fleet · SHP-88201-US', amount: '$1,180.00', status: 'paid' },
   { id: 'INV-2024-1165', date: 'Oct 15, 2024', description: 'Ocean Freight · SHP-77219-SG', amount: '$9,460.00', status: 'paid' },
   { id: 'INV-2024-1158', date: 'Oct 08, 2024', description: 'Intermodal LCL · SHP-74812-AU', amount: '$2,940.00', status: 'overdue' },
-  { id: 'INV-2024-1141', date: 'Sep 25, 2024', description: 'Air Cargo Express · SHP-69033-FR', amount: '$5,620.00', status: 'paid' },
+  { id: 'INV-2024-1136', date: 'Sep 18, 2024', description: 'Ground Fleet · SHP-74812-AU — Cancelled (Order Received)', amount: '$2,940.00', status: 'refunded' },
   { id: 'INV-2024-1132', date: 'Sep 12, 2024', description: 'Temp Controlled · MSKU-45520-BR', amount: '$7,890.00', status: 'paid' },
+  { id: 'INV-2024-1120', date: 'Sep 02, 2024', description: 'Air Cargo Express · SHP-69033-FR — Cancelled (Order Received)', amount: '$5,620.00', status: 'refunded' },
 ]
 
 export interface SavedCard {
@@ -38,10 +40,13 @@ export const billingSummary = {
   paidThisMonth: '$42,150.00',
   paidNote: '19 invoices reconciled this month',
   nextBatch: 'Nov 28, 2024',
+  refundedTotal: '$20,960.00',
+  refundedNote: '3 cancelled orders refunded to Visa via Stripe',
 }
 
 export const invoiceStatusTone: Record<InvoiceStatus, string> = {
   paid: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
   open: 'border-tertiary-container/30 bg-tertiary-container/15 text-tertiary',
   overdue: 'border-destructive/30 bg-destructive/10 text-destructive',
+  refunded: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
 }
