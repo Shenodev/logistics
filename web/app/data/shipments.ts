@@ -1,4 +1,4 @@
-export type ShipmentStatus = 'order_received' | 'booked' | 'in_transit' | 'out_for_delivery' | 'delivered'
+export type ShipmentStatus = 'order_received' | 'booked' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled'
 
 /**
  * Stage 1 canonical status is `order_received` ("Order Received" / "استلام الطلب").
@@ -10,6 +10,14 @@ export function isCancellableStatus(status: ShipmentStatus): boolean {
 
 export function canCancelOrder(shipment: { status: ShipmentStatus }): boolean {
   return isCancellableStatus(shipment.status)
+}
+
+export function isRefundEligible(shipment: Pick<Shipment, 'status' | 'refundStatus'>): boolean {
+  return shipment.status === 'cancelled' && shipment.refundStatus === 'pending'
+}
+
+export function isRefunded(shipment: Pick<Shipment, 'refundStatus'>): boolean {
+  return shipment.refundStatus === 'refunded'
 }
 
 export interface Milestone {
@@ -69,6 +77,13 @@ export interface Shipment {
   milestones: Milestone[]
   currentPhase: string
   timelineFillPct: number
+  // financial / cancellation
+  cancelledAt?: string | null
+  cancelledBy?: string | null
+  refundStatus?: 'none' | 'pending' | 'refunded'
+  refundId?: string | null
+  refundAmount?: string
+  invoiceId?: string
 }
 
 export const STATUS_FLOW: Record<ShipmentStatus, { label: string; index: number }> = {
@@ -77,6 +92,7 @@ export const STATUS_FLOW: Record<ShipmentStatus, { label: string; index: number 
   in_transit: { label: 'In Transit', index: 2 },
   out_for_delivery: { label: 'Out for Delivery', index: 3 },
   delivered: { label: 'Delivered', index: 4 },
+  cancelled: { label: 'Cancelled', index: 0 },
 }
 
 const STEP_LABELS = [
@@ -95,6 +111,10 @@ const STEP_DETAILS: Record<ShipmentStatus, { detail: string[]; time: string[] }>
   booked: {
     detail: ['Booking Confirmed', 'Carrier Assigned', 'Expected Soon', 'Upcoming', 'Consignee Sign-off'],
     time: ['Oct 24 • 14:32', 'Oct 25 • 08:15', 'Est. Oct 28', 'Est. Oct 29 • 09:00', 'Est. Oct 29 • 16:30'],
+  },
+  cancelled: {
+    detail: ['Order Cancelled — Refund Pending', 'Carrier Released', 'Refund Queued', 'Awaiting Admin Visa Refund', 'Closed'],
+    time: ['Oct 24 • 14:32', 'Oct 24 • 14:35', 'Oct 24 • 14:35', 'Pending Admin Action', '—'],
   },
   in_transit: {
     detail: ['Completed', 'Rotterdam Port Depot', 'Expected Oct 28', 'Upcoming', 'Consignee Sign-off'],
@@ -176,7 +196,8 @@ const DEFAULT_HANDLING = [
   },
 ]
 
-function buildShipment(seed: ShipmentSeed): Shipment {
+function buildShipment(seed: ShipmentSeed & Partial<Pick<Shipment, 'cancelledAt' | 'cancelledBy' | 'refundStatus' | 'refundId' | 'refundAmount' | 'invoiceId'>>): Shipment {
+  const isCancelled = seed.status === 'cancelled'
   return {
     id: seed.id,
     mode: seed.mode,
@@ -188,7 +209,7 @@ function buildShipment(seed: ShipmentSeed): Shipment {
     destinationCode: seed.destinationCode,
     bookedAt: 'Oct 24, 2024 • 14:32 UTC',
     masterAwb: '724-81920194',
-    eta: seed.eta,
+    eta: isCancelled ? 'Cancelled — refund pending' : seed.eta,
     etaTz: 'CDT',
     carrier: seed.carrier,
     lat: seed.id === 'SHP-89421-US' ? '48.219° N' : '41.500° N',
@@ -226,6 +247,12 @@ function buildShipment(seed: ShipmentSeed): Shipment {
     milestones: milestonesFor(seed.status),
     currentPhase: STATUS_FLOW[seed.status].label,
     timelineFillPct: timelineFillPct(seed.status),
+    cancelledAt: seed.cancelledAt ?? (isCancelled ? 'Oct 24, 2024 • 14:35 UTC' : null),
+    cancelledBy: seed.cancelledBy ?? (isCancelled ? 'user@sheno.dev' : null),
+    refundStatus: seed.refundStatus ?? (isCancelled ? 'pending' : 'none'),
+    refundId: seed.refundId ?? null,
+    refundAmount: seed.refundAmount ?? (isCancelled ? '$12,400.00' : '$0.00'),
+    invoiceId: seed.invoiceId ?? `INV-2024-${seed.id.slice(-4)}`,
   }
 }
 
@@ -322,6 +349,42 @@ export const shipments: Shipment[] = [
     receiver: 'Dr. Maya Patel',
     receiverRole: 'Cold Chain Supervisor',
     receiverBadge: 'MTM-88',
+  }),
+  buildShipment({
+    id: 'SHP-10004-CAN',
+    mode: 'Ocean Freight',
+    status: 'cancelled',
+    priority: 'Standard Freight',
+    origin: 'Rotterdam',
+    originCode: 'RTM',
+    destination: 'Chicago',
+    destinationCode: 'ORD',
+    carrier: 'Carrier released — order cancelled',
+    eta: 'Cancelled — refund pending',
+    nextCheckpoint: 'Order Received — cancelled by user',
+    nextCheckpointIn: 'Refund pending admin action',
+    grossWeight: '8,900 kg',
+    grossWeightLbs: '19,621 lbs',
+    totalVolume: '42.0 m³',
+    totalVolumeCu: '1,483 cu ft',
+    pallets: '12 Units',
+    palletType: 'Euro Pallets (EPAL 1)',
+    containerSpec: '40ft HC',
+    containerSpecDetail: 'High Cube Intermodal',
+    dimensions: "12.19m × 2.44m × 2.89m (40'0\" × 8'0\" × 9'6\")",
+    tare: '3,980 kg (Standard Cor-Ten Steel)',
+    hsCode: '8542.31',
+    hsDesc: 'Electronic Integrated Circuits (Processors & Controllers)',
+    consigneeName: 'Apex Global Distribution Center, Bay 14',
+    consigneeAddress: '1040 Logistics Blvd, Bensenville, IL 60106, United States',
+    receiver: 'Robert Chen',
+    receiverRole: 'Lead Logistics Manager',
+    receiverBadge: 'APX-9941',
+    cancelledAt: 'Oct 24, 2024 • 14:35 UTC',
+    cancelledBy: 'user@sheno.dev',
+    refundStatus: 'pending',
+    refundAmount: '$8,900.00',
+    invoiceId: 'INV-2024-10004',
   }),
   buildShipment({
     id: 'SHP-89421-US',

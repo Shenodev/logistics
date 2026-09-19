@@ -5,9 +5,11 @@ definePageMeta({ layout: 'user', middleware: 'auth' })
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 const { get: findShipment, cancelOrder } = useShipments()
 
 const shipment = computed(() => findShipment(String(route.params.id ?? '')))
+const isAdmin = computed(() => auth.isAdmin)
 
 useSeoMeta({
   title: () => shipment.value ? `${shipment.value.id} · Tracking` : 'Shipment not found',
@@ -37,16 +39,21 @@ function closeCancelDialog() {
 async function confirmCancel() {
   if (!shipment.value || cancelling.value) return
   cancelling.value = true
-  // Simulate async cancellation (would be Stripe refund flag on backend)
+  // Simulate async cancellation — flags for Stripe refund, stays as cancelled
   await new Promise((resolve) => setTimeout(resolve, 500))
-  cancelOrder(shipment.value.id)
+  const ok = cancelOrder(shipment.value.id)
   cancelling.value = false
   showCancelConfirm.value = false
-  cancelSuccess.value = true
-  // Brief success state then redirect to shipments list
-  setTimeout(() => {
-    router.push('/shipments')
-  }, 900)
+  if (ok) {
+    cancelSuccess.value = true
+    // Stay on page to show refund management — do not redirect
+    setTimeout(() => (cancelSuccess.value = false), 4000)
+  }
+}
+
+function onRefundIssued(_refundId: string) {
+  // Shipment is reactive via useShipments — refundStatus will update and section will re-render to refunded
+  cancelSuccess.value = false
 }
 </script>
 
@@ -246,6 +253,9 @@ async function confirmCancel() {
 
         <!-- 3. Milestone timeline (extracted Vue component) -->
         <ShipmentMilestoneTimeline :shipment="shipment" />
+
+        <!-- 3b. Refund Management — financial UI (admin: Issue Visa Refund for eligible cancelled) -->
+        <ShipmentRefundManagement :shipment="shipment" :is-admin="isAdmin" @refund-issued="onRefundIssued" />
 
         <!-- 4. Cargo details & POD -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

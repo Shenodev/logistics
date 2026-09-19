@@ -21,10 +21,38 @@ export function useShipments() {
   }
 
   function cancelOrder(id: string): boolean {
-    // Business rule: cancellation is only a soft remove in UI;
-    // backend would flag for Stripe refund. Here we remove from the reactive list.
-    return remove(id)
+    const key = id.trim().toUpperCase()
+    const item = state.items.find((s) => s.id === key)
+    if (!item) return false
+    if (item.status !== 'order_received' && item.status !== 'booked') return false
+    if (item.status === 'cancelled') return false
+    item.status = 'cancelled'
+    item.cancelledAt = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' • ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ' UTC'
+    item.cancelledBy = 'current_user'
+    item.refundStatus = 'pending'
+    item.refundId = null
+    item.eta = 'Cancelled — refund pending'
+    item.nextCheckpoint = 'Order cancelled — awaiting admin Visa refund'
+    item.nextCheckpointIn = 'Refund pending'
+    item.currentPhase = 'Cancelled'
+    item.timelineFillPct = 0
+    // milestones will reflect cancelled on next computed if needed, but keep existing for now
+    return true
   }
 
-  return { list, get, remove, cancelOrder }
+  function issueRefund(id: string): { ok: boolean; refundId?: string } {
+    const key = id.trim().toUpperCase()
+    const item = state.items.find((s) => s.id === key)
+    if (!item) return { ok: false }
+    if (item.status !== 'cancelled') return { ok: false }
+    if (item.refundStatus === 'refunded') return { ok: false }
+    // Mock Stripe refund
+    const refundId = `re_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`
+    item.refundStatus = 'refunded'
+    item.refundId = refundId
+    item.nextCheckpointIn = 'Refunded to Visa'
+    return { ok: true, refundId }
+  }
+
+  return { list, get, remove, cancelOrder, issueRefund }
 }
