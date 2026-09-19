@@ -1,7 +1,35 @@
 <script setup lang="ts">
 import { activityFeed, recentQueries } from '~~/app/data/shipments'
+import { incomingSeed } from '~~/app/data/delivery'
 
 definePageMeta({ layout: 'user', middleware: 'auth' })
+
+const appRole = useAppRole()
+const isDelivery = computed(() => appRole === 'delivery')
+
+// Delivery dashboard state (mobile-first, re-used on / for delivery PWA)
+const deliveryQueue = ref([...incomingSeed])
+const deliveryProcessing = ref<string | null>(null)
+const deliveryToast = ref<string | null>(null)
+function onDeliveryAccept(id: string) {
+  deliveryProcessing.value = id
+  setTimeout(() => {
+    deliveryQueue.value = deliveryQueue.value.filter((o) => o.shipment.id !== id)
+    deliveryProcessing.value = null
+    deliveryToast.value = `Accepted ${id}`
+    setTimeout(() => (deliveryToast.value = null), 2000)
+    if ('vibrate' in navigator) navigator.vibrate(20)
+  }, 500)
+}
+function onDeliveryReject(id: string) {
+  deliveryProcessing.value = id
+  setTimeout(() => {
+    deliveryQueue.value = deliveryQueue.value.filter((o) => o.shipment.id !== id)
+    deliveryProcessing.value = null
+    deliveryToast.value = `Rejected ${id}`
+    setTimeout(() => (deliveryToast.value = null), 2000)
+  }, 300)
+}
 
 useSeoMeta({
   title: 'Dashboard',
@@ -84,7 +112,31 @@ const stats = [
 </script>
 
 <template>
-  <main class="bg-background">
+  <!-- Delivery PWA: mobile-first dashboard at root -->
+  <main v-if="isDelivery" class="bg-background">
+    <div class="mx-auto w-full max-w-md space-y-4 p-4 pb-6">
+      <div class="rounded-xl border border-outline-variant bg-surface-container p-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="font-heading text-headline-md font-bold text-on-surface">Delivery Dashboard</h1>
+            <p class="text-body-sm text-on-surface-variant">Mobile • Large touch targets</p>
+          </div>
+          <span class="rounded-full bg-primary px-2.5 py-1 text-label-sm font-bold text-on-primary">Online</span>
+        </div>
+        <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+          <div class="rounded-lg bg-surface-low p-2"><div class="font-telemetry-numeric text-lg font-bold text-primary">3</div><div class="text-[11px] uppercase tracking-wider text-on-surface-variant">Incoming</div></div>
+          <div class="rounded-lg bg-surface-low p-2"><div class="font-telemetry-numeric text-lg font-bold text-on-surface">1</div><div class="text-[11px] uppercase tracking-wider text-on-surface-variant">Active</div></div>
+          <div class="rounded-lg bg-surface-low p-2"><div class="font-telemetry-numeric text-lg font-bold text-tertiary">96%</div><div class="text-[11px] uppercase tracking-wider text-on-surface-variant">Rate</div></div>
+        </div>
+      </div>
+      <div v-if="deliveryToast" class="rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-center text-body-sm font-medium text-primary">{{ deliveryToast }}</div>
+      <DeliveryIncomingQueue :orders="deliveryQueue" :processing-id="deliveryProcessing" @accept="onDeliveryAccept" @reject="onDeliveryReject" />
+      <NuxtLink to="/incoming" class="flex min-h-12 w-full items-center justify-center gap-1 rounded-xl border border-outline-variant bg-surface-container px-4 text-label-md font-bold text-primary hover:bg-surface-container-high">
+        <MIcon name="inbox" class="text-[20px]" /> Go to Incoming Queue
+      </NuxtLink>
+    </div>
+  </main>
+  <main v-else class="bg-background">
     <div class="mx-auto max-w-[1600px] space-y-6 p-6">
       <!-- Track Shipment Command Surface -->
       <section class="rounded-xl border border-outline-variant bg-surface-container p-6">
