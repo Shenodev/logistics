@@ -13,6 +13,10 @@ async function logout() {
     <header class="sticky top-0 z-20 border-b border-border bg-card/50 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <AppBrand suffix="Admin" />
+        <nav class="hidden md:flex items-center gap-1">
+          <NuxtLink to="/admin" class="rounded-lg px-3 py-1.5 text-label-md font-medium transition-colors" :class="$route.path==='/admin' ? 'bg-surface-container text-primary border border-outline-variant' : 'text-on-surface-variant hover:text-on-surface'">Command Center</NuxtLink>
+          <NuxtLink to="/admin/route-planning" class="rounded-lg px-3 py-1.5 text-label-md font-medium transition-colors" :class="$route.path.startsWith('/admin/route-planning') ? 'bg-surface-container text-primary border border-outline-variant' : 'text-on-surface-variant hover:text-on-surface'">Route Planning</NuxtLink>
+        </nav>
         <div class="flex items-center gap-3">
           <Badge class="bg-primary text-primary-foreground">Command Center</Badge>
           <div class="hidden items-center gap-2 sm:flex">
