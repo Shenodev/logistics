@@ -23,13 +23,7 @@ const initials = computed(() => {
 const nav = [
   { label: 'Overview', icon: 'dashboard', to: '/' },
   { label: 'My Shipments', icon: 'local_shipping', to: '/shipments' },
-  { label: 'Billing', icon: 'receipt_long', to: '/billing' },
   { label: 'Profile', icon: 'account_circle', to: '/profile' },
-]
-
-const footerNav = [
-  { label: 'Support', icon: 'help', to: '/support' },
-  { label: 'Settings', icon: 'settings', to: '/settings' },
 ]
 
 function isActive(to: string) {
@@ -94,18 +88,6 @@ async function logout() {
         </div>
 
         <div class="space-y-4 border-t border-outline-variant pt-4">
-          <nav class="space-y-1">
-            <NuxtLink
-              v-for="item in footerNav"
-              :key="item.label"
-              :to="item.to"
-              class="flex items-center gap-2 rounded-r-lg px-4 py-1.5 font-label-md text-on-surface-variant transition-colors duration-150 hover:bg-surface-high hover:text-on-surface"
-            >
-              <MIcon :name="item.icon" class="text-[20px]" />
-              <span>{{ item.label }}</span>
-            </NuxtLink>
-          </nav>
-
           <div class="flex items-center justify-between rounded-lg border border-outline-variant bg-surface-container p-2">
             <div class="flex items-center gap-1">
               <span class="relative flex h-2 w-2">

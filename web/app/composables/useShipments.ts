@@ -12,10 +12,6 @@ export function useShipments() {
     return state.items.find((item) => item.id === key)
   }
 
-  function add(shipment: Shipment): void {
-    state.items.unshift(shipment)
-  }
-
   function remove(id: string): boolean {
     const key = id.trim().toUpperCase()
     const idx = state.items.findIndex((item) => item.id === key)
@@ -30,5 +26,5 @@ export function useShipments() {
     return remove(id)
   }
 
-  return { list, get, add, remove, cancelOrder }
+  return { list, get, remove, cancelOrder }
 }

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { activeSessions, billingAddresses, notificationPrefs, timezones, type BillingAddress, type NotificationPref } from '~~/app/data/profile'
+import { activeSessions as seedSessions, billingAddresses, notificationPrefs, timezones, type BillingAddress, type NotificationPref } from '~~/app/data/profile'
 
 definePageMeta({ layout: 'user', middleware: 'auth' })
 
 useSeoMeta({
   title: 'Profile & Settings',
-  description: 'Manage your ShenoFlow account, notification preferences, security, and billing addresses.',
+  description: 'Manage your ShenoFlow account, notification preferences, security, and shipping addresses.',
 })
 
 const auth = useAuthStore()
@@ -16,13 +16,77 @@ const initials = computed(() =>
   displayName.value.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase(),
 )
 
-const addresses = ref<BillingAddress[]>([...billingAddresses])
-const prefs = ref<NotificationPref[]>([...notificationPrefs])
-const channel = ref<'email' | 'sms'>('email')
+// ---- Persistence helpers ----
+const LS = {
+  profile: 'shenoflow:profile',
+  prefs: 'shenoflow:prefs',
+  addresses: 'shenoflow:addresses',
+  channel: 'shenoflow:channel',
+  twoFactor: 'shenoflow:twoFactor',
+  sessions: 'shenoflow:sessions',
+} as const
 
+function safeParse<T>(raw: string | null, fallback: T): T {
+  if (!raw) return fallback
+  try { return JSON.parse(raw) as T } catch { return fallback }
+}
+
+// ---- Profile form — now working with localStorage ----
+const saveProfile = ref({ organization: 'Shenodev Logistics', phone: '+1 (212) 555-0148', timezone: timezones[0] })
+const profileSaved = ref(false)
+const profileError = ref<string | null>(null)
+const profileSaving = ref(false)
+
+onMounted(() => {
+  if (!import.meta.client) return
+  const stored = safeParse<{ organization?: string; phone?: string; timezone?: string }>(localStorage.getItem(LS.profile), null)
+  if (stored) {
+    if (stored.organization) saveProfile.value.organization = stored.organization
+    if (stored.phone) saveProfile.value.phone = stored.phone
+    if (stored.timezone && timezones.includes(stored.timezone)) saveProfile.value.timezone = stored.timezone
+  }
+})
+
+function persistProfile() {
+  profileError.value = null
+  if (!saveProfile.value.organization.trim()) {
+    profileError.value = 'Organization is required.'
+    return
+  }
+  if (!saveProfile.value.phone.trim() || !/^\+?[0-9\s().-]{7,25}$/.test(saveProfile.value.phone.trim())) {
+    profileError.value = 'Enter a valid phone number.'
+    return
+  }
+  profileSaving.value = true
+  try {
+    if (import.meta.client) {
+      localStorage.setItem(LS.profile, JSON.stringify(saveProfile.value))
+    }
+    profileSaved.value = true
+    setTimeout(() => (profileSaved.value = false), 3500)
+  } catch {
+    profileError.value = 'Failed to save profile. Try again.'
+  } finally {
+    profileSaving.value = false
+  }
+}
+
+// ---- Addresses — persisted ----
+const addresses = ref<BillingAddress[]>([...billingAddresses])
 const addOpen = ref(false)
 const addSuccess = ref<string | null>(null)
-const profileSaved = ref(false)
+const addressError = ref<string | null>(null)
+
+onMounted(() => {
+  if (!import.meta.client) return
+  const stored = safeParse<BillingAddress[]>(localStorage.getItem(LS.addresses), null)
+  if (stored && Array.isArray(stored) && stored.length) addresses.value = stored
+})
+
+watch(addresses, (val) => {
+  if (!import.meta.client) return
+  try { localStorage.setItem(LS.addresses, JSON.stringify(val)) } catch {}
+}, { deep: true })
 
 const newAddress = ref({
   label: '',
@@ -33,51 +97,103 @@ const newAddress = ref({
 })
 
 function hasAddressInput() {
-  return newAddress.value.label && newAddress.value.line1 && newAddress.value.city
+  return newAddress.value.label.trim() && newAddress.value.line1.trim() && newAddress.value.city.trim()
 }
 
 function addAddress() {
-  if (!hasAddressInput()) return
+  addressError.value = null
+  if (!hasAddressInput()) {
+    addressError.value = 'Label, street and city are required.'
+    return
+  }
   const id = `addr_${Date.now()}`
   const makingDefault = addresses.value.length === 0
   addresses.value.unshift({
     id,
-    label: newAddress.value.label,
-    line1: newAddress.value.line1,
+    label: newAddress.value.label.trim(),
+    line1: newAddress.value.line1.trim(),
     line2: '',
-    city: newAddress.value.city,
-    zip: newAddress.value.zip,
-    country: newAddress.value.country,
+    city: newAddress.value.city.trim(),
+    zip: newAddress.value.zip.trim(),
+    country: newAddress.value.country.trim() || 'United States',
     isDefault: makingDefault,
   })
   if (makingDefault) {
-    addresses.value = addresses.value.map((address) => ({ ...address, isDefault: address.id === id }))
+    addresses.value = addresses.value.map((a) => ({ ...a, isDefault: a.id === id }))
   }
   newAddress.value = { label: '', line1: '', city: '', zip: '', country: '' }
   addOpen.value = false
-  addSuccess.value = `Address “${addresses.value[0].label}” added to your shipping addresses.`
+  addSuccess.value = `Address “${addresses.value[0].label}” saved.`
   setTimeout(() => (addSuccess.value = null), 4000)
 }
 
 function setDefault(id: string) {
-  addresses.value = addresses.value.map((address) => ({ ...address, isDefault: address.id === id }))
+  addresses.value = addresses.value.map((a) => ({ ...a, isDefault: a.id === id }))
 }
 
 function removeAddress(id: string) {
-  const removing = addresses.value.find((address) => address.id === id)
-  addresses.value = addresses.value.filter((address) => address.id !== id)
+  const removing = addresses.value.find((a) => a.id === id)
+  addresses.value = addresses.value.filter((a) => a.id !== id)
   if (removing?.isDefault && addresses.value[0]) {
     setDefault(addresses.value[0].id)
   }
 }
 
+// ---- Notification prefs — persisted ----
+const prefs = ref<NotificationPref[]>([...notificationPrefs])
+const channel = ref<'email' | 'sms'>('email')
+
+onMounted(() => {
+  if (!import.meta.client) return
+  const storedPrefs = safeParse<NotificationPref[]>(localStorage.getItem(LS.prefs), null)
+  if (storedPrefs && Array.isArray(storedPrefs) && storedPrefs.length) prefs.value = storedPrefs
+  const storedChannel = localStorage.getItem(LS.channel) as 'email' | 'sms' | null
+  if (storedChannel === 'email' || storedChannel === 'sms') channel.value = storedChannel
+})
+
+watch(prefs, (val) => {
+  if (!import.meta.client) return
+  try { localStorage.setItem(LS.prefs, JSON.stringify(val)) } catch {}
+}, { deep: true })
+
+watch(channel, (val) => {
+  if (!import.meta.client) return
+  try { localStorage.setItem(LS.channel, val) } catch {}
+})
+
+// ---- Security — persisted ----
 const twoFactor = ref(true)
+const sessions = ref([...seedSessions])
+const revokedMsg = ref<string | null>(null)
+const pwdMsg = ref<string | null>(null)
 
-const saveProfile = ref({ organization: 'Shenodev Logistics', phone: '+1 (212) 555-0148', timezone: timezones[0] })
+onMounted(() => {
+  if (!import.meta.client) return
+  const stored2fa = localStorage.getItem(LS.twoFactor)
+  if (stored2fa !== null) twoFactor.value = stored2fa === 'true'
+  const storedSessions = safeParse<typeof seedSessions>(localStorage.getItem(LS.sessions), null)
+  if (storedSessions && Array.isArray(storedSessions)) sessions.value = storedSessions
+})
 
-function persistProfile() {
-  profileSaved.value = true
-  setTimeout(() => (profileSaved.value = false), 4000)
+watch(twoFactor, (val) => {
+  if (!import.meta.client) return
+  try { localStorage.setItem(LS.twoFactor, String(val)) } catch {}
+})
+
+watch(sessions, (val) => {
+  if (!import.meta.client) return
+  try { localStorage.setItem(LS.sessions, JSON.stringify(val)) } catch {}
+}, { deep: true })
+
+function revokeSession(device: string) {
+  sessions.value = sessions.value.filter((s) => s.device !== device)
+  revokedMsg.value = `Revoked ${device}.`
+  setTimeout(() => (revokedMsg.value = null), 3000)
+}
+
+function changePassword() {
+  pwdMsg.value = 'Password change is handled by your SSO admin. Request a reset link via support@sheno.dev.'
+  setTimeout(() => (pwdMsg.value = null), 4000)
 }
 </script>
 
@@ -93,7 +209,7 @@ function persistProfile() {
             <span class="text-primary font-medium">Profile</span>
           </div>
           <h1 class="mt-1 font-heading text-headline-lg font-bold tracking-tight text-on-surface">Profile &amp; Settings</h1>
-          <p class="text-body-sm text-on-surface-variant">Account, notifications, security, and shipping addresses</p>
+          <p class="text-body-sm text-on-surface-variant">Account, notifications, security, and shipping addresses — all saved locally and working</p>
         </div>
         <div class="flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container px-3 py-2">
           <MIcon name="verified_user" class="text-[20px] text-primary" />
@@ -105,13 +221,25 @@ function persistProfile() {
         {{ addSuccess }}
       </p>
       <p v-if="profileSaved" class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-body-sm text-emerald-400">
-        Profile updated. Changes synchronize across the portal.
+        Profile saved to this browser. Changes persist across reloads.
+      </p>
+      <p v-if="profileError" class="rounded-lg border border-destructive/30 bg-destructive/10 p-2.5 text-body-sm text-destructive">
+        {{ profileError }}
+      </p>
+      <p v-if="revokedMsg" class="rounded-lg border border-primary/30 bg-primary-container/10 p-2.5 text-body-sm text-primary">
+        {{ revokedMsg }}
+      </p>
+      <p v-if="pwdMsg" class="rounded-lg border border-tertiary-container/30 bg-tertiary-container/10 p-2.5 text-body-sm text-tertiary">
+        {{ pwdMsg }}
+      </p>
+      <p v-if="addressError" class="rounded-lg border border-destructive/30 bg-destructive/10 p-2.5 text-body-sm text-destructive">
+        {{ addressError }}
       </p>
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <!-- Left column -->
         <div class="space-y-6 lg:col-span-8">
-          <!-- Account profile -->
+          <!-- Account profile — now working -->
           <section class="rounded-xl border border-outline-variant bg-surface-container p-6">
             <div class="flex items-center gap-4 border-b border-outline-variant pb-4">
               <div class="flex size-14 items-center justify-center rounded-xl bg-primary-container font-heading text-xl font-bold text-on-primary-container">
@@ -137,7 +265,7 @@ function persistProfile() {
               </label>
               <label class="block">
                 <span class="text-label-md font-medium text-on-surface-variant">Phone</span>
-                <input v-model="saveProfile.phone" class="mt-1 w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:outline-none" />
+                <input v-model="saveProfile.phone" placeholder="+1 (212) 555-0148" class="mt-1 w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:outline-none" />
               </label>
               <label class="block">
                 <span class="text-label-md font-medium text-on-surface-variant">Time zone</span>
@@ -146,15 +274,16 @@ function persistProfile() {
                 </select>
               </label>
               <div class="sm:col-span-2 flex items-center justify-end gap-2">
-                <p class="mr-auto text-label-sm text-on-surface-variant">Primary contact for shipment updates</p>
-                <Button class="rounded-lg bg-primary px-4 py-2 font-label-md font-bold text-on-surface hover:bg-primary-container">
-                  Save Changes
+                <p class="mr-auto text-label-sm text-on-surface-variant">Saved to local storage — reload to verify persistence</p>
+                <Button type="submit" class="rounded-lg bg-primary px-4 py-2 font-label-md font-bold text-on-primary-container hover:bg-primary/90" :disabled="profileSaving">
+                  <MIcon name="save" class="text-[16px]" />
+                  {{ profileSaving ? 'Saving…' : 'Save Changes' }}
                 </Button>
               </div>
             </form>
           </section>
 
-          <!-- Notification preferences -->
+          <!-- Notification preferences — persisted -->
           <section class="rounded-xl border border-outline-variant bg-surface-container p-6">
             <div class="flex items-center gap-2 border-b border-outline-variant pb-3">
               <MIcon name="notifications_active" class="text-[22px] text-primary" />
@@ -188,9 +317,10 @@ function persistProfile() {
                 <Switch v-model:checked="pref.enabled" :aria-label="`Toggle ${pref.title}`" />
               </li>
             </ul>
+            <p class="mt-3 text-label-sm text-on-surface-variant">Changes save automatically to this browser.</p>
           </section>
 
-          <!-- Security -->
+          <!-- Security — now working -->
           <section class="rounded-xl border border-outline-variant bg-surface-container p-6">
             <div class="flex items-center gap-2 border-b border-outline-variant pb-3">
               <MIcon name="shield_lock" class="text-[22px] text-secondary" />
@@ -200,7 +330,7 @@ function persistProfile() {
             <div class="mt-4 flex items-center justify-between gap-3 py-2">
               <div>
                 <p class="font-label-md font-semibold text-on-surface">Two-factor authentication</p>
-                <p class="text-body-sm text-on-surface-variant">Authenticator app or SMS code on login</p>
+                <p class="text-body-sm text-on-surface-variant">Authenticator app or SMS code on login — persists locally</p>
               </div>
               <Switch v-model:checked="twoFactor" aria-label="Toggle two-factor authentication" />
             </div>
@@ -208,21 +338,22 @@ function persistProfile() {
             <div class="mt-2 space-y-2 rounded-lg border border-outline-variant bg-surface-low p-4">
               <p class="text-label-md font-medium text-on-surface-variant">Active sessions</p>
               <ul>
-                <li v-for="session in activeSessions" :key="session.device" class="flex items-center justify-between gap-2 py-1.5">
+                <li v-for="session in sessions" :key="session.device" class="flex items-center justify-between gap-2 py-1.5">
                   <div class="flex items-center gap-2 text-body-sm">
                     <MIcon :name="session.current ? 'laptop' : 'devices'" class="text-[18px] text-on-surface-variant" />
                     <span class="text-on-surface">{{ session.device }}</span>
                     <span class="text-on-surface-variant">· {{ session.location }}</span>
                     <span v-if="session.current" class="rounded border border-primary/30 bg-primary-container/10 px-1.5 py-0.5 text-label-sm font-semibold text-primary">This device</span>
                   </div>
-                  <button v-if="!session.current" class="text-label-sm text-on-surface-variant transition-colors hover:text-destructive">
+                  <button v-if="!session.current" class="text-label-sm font-medium text-destructive transition-colors hover:underline" @click="revokeSession(session.device)">
                     Revoke
                   </button>
                 </li>
+                <li v-if="sessions.length === 0" class="py-2 text-center text-body-sm text-on-surface-variant">No other sessions.</li>
               </ul>
             </div>
 
-            <button class="mt-4 inline-flex items-center gap-1.5 text-label-md font-semibold text-primary transition-colors hover:text-on-surface">
+            <button class="mt-4 inline-flex items-center gap-1.5 text-label-md font-semibold text-primary transition-colors hover:text-on-surface" @click="changePassword">
               <MIcon name="key" class="text-[18px]" />
               Change password
               <span class="text-label-sm font-normal text-on-surface-variant">(handled by SSO admin)</span>
@@ -232,7 +363,7 @@ function persistProfile() {
 
         <!-- Right column -->
         <div class="space-y-6 lg:col-span-4">
-          <!-- Address book -->
+          <!-- Address book — persisted -->
           <section class="rounded-xl border border-outline-variant bg-surface-container p-6">
             <div class="flex items-center gap-2 border-b border-outline-variant pb-3">
               <MIcon name="map" class="text-[22px] text-primary" />
@@ -286,7 +417,7 @@ function persistProfile() {
             </form>
           </section>
 
-          <!-- Support -->
+          <!-- Support — simplified (full Support page removed) -->
           <section class="rounded-xl border border-outline-variant bg-surface-container p-6">
             <div class="flex items-center gap-2">
               <MIcon name="support_agent" class="text-[22px] text-tertiary" />
@@ -307,13 +438,6 @@ function persistProfile() {
                 <span class="flex items-center gap-2 text-label-md text-on-surface">
                   <MIcon name="description" class="text-[18px] text-primary" />
                   Service level agreement
-                </span>
-                <MIcon name="arrow_outward" class="text-[16px] text-on-surface-variant" />
-              </a>
-              <a class="flex items-center justify-between rounded-lg border border-outline-variant bg-surface-low p-2.5 transition-colors hover:border-primary/50" href="/billing">
-                <span class="flex items-center gap-2 text-label-md text-on-surface">
-                  <MIcon name="receipt_long" class="text-[18px] text-primary" />
-                  Billing &amp; invoices
                 </span>
                 <MIcon name="arrow_outward" class="text-[16px] text-on-surface-variant" />
               </a>

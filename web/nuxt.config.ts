@@ -91,7 +91,6 @@ export default defineNuxtConfig({
       deliverySubdomain: 'delivery',
       apiBase: 'https://api.logistics.shenodev.tech',
       siteUrl: 'https://logistics.shenodev.tech',
-      stripePk: '',
     },
   },
   vite: {
