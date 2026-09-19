@@ -23,6 +23,7 @@ const initials = computed(() => {
 const nav = [
   { label: 'Overview', icon: 'dashboard', to: '/' },
   { label: 'My Shipments', icon: 'local_shipping', to: '/shipments' },
+  { label: 'Billing', icon: 'receipt_long', to: '/billing' },
   { label: 'Profile', icon: 'account_circle', to: '/profile' },
 ]
 
