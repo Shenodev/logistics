@@ -43,7 +43,7 @@ const badgeTone: Record<ShipmentStatus, string> = {
 <template>
   <main class="bg-background">
     <div class="mx-auto max-w-[1600px] space-y-6 p-6">
-      <!-- Header — read-only: no New Shipment / Request Quote -->
+      <!-- Header — read-only -->
       <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <div class="flex items-center gap-2 text-body-sm text-on-surface-variant">

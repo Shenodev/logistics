@@ -41,7 +41,11 @@
     "vue-demi@0.14.10": true
   },
   "devDependencies": {
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^26.1.0",
     "png-to-ico": "^3.0.2",
-    "typescript": "^5.9.3"
+    "supertest": "^7.1.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }
