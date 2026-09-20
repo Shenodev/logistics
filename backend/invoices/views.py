@@ -5,18 +5,15 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from accounts.permissions import IsAdmin
 
 from orders.models import Order
 
 from .models import Invoice
 
 logger = logging.getLogger(__name__)
-
-
-def _is_admin(user) -> bool:
-    return getattr(user, 'role', None) == 'admin' or getattr(user, 'is_staff', False)
 
 
 def _get_stripe_client():
@@ -36,7 +33,7 @@ def _get_stripe_client():
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdmin])
 def create_refund(request):
     """
     Secure Admin-only endpoint: POST /api/v1/refunds/
@@ -50,9 +47,8 @@ def create_refund(request):
     Calls Stripe API to refund the original Visa PaymentIntent, then
     updates Invoice.status -> 'refunded' and Order.refund_status -> 'refunded'.
     """
+    # IsAdmin permission already enforced; request.user is guaranteed admin
     user = request.user
-    if not _is_admin(user):
-        return Response({'detail': 'Admin access required.'}, status=status.HTTP_403_FORBIDDEN)
 
     order_number = (request.data.get('order_number') or '').strip()
     invoice_number = (request.data.get('invoice_number') or '').strip()

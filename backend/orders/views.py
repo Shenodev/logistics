@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from accounts.permissions import IsAdmin, IsAssignedDriverOrAdmin, IsDriverAssignedOrUnassignedPool
+
 from .models import Order
 from .serializers import OrderSerializer
 
@@ -14,6 +16,24 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     lookup_field = 'order_number'
     lookup_url_kwarg = 'order_number'
+
+    def get_permissions(self):
+        # Strict RBAC per action
+        if self.action in ('update', 'partial_update'):
+            # Drivers may only update their assigned orders; admins may update any
+            return [IsAuthenticated(), IsAssignedDriverOrAdmin()]
+        if self.action in ('accept', 'reject'):
+            # Drivers only, on pool or assigned
+            return [IsAuthenticated(), IsDriverAssignedOrUnassignedPool()]
+        if self.action == 'cancel':
+            # Owner or admin (object-level checked inside), but require auth
+            return [IsAuthenticated()]
+        if self.action == 'create':
+            # Manual creation blocked for non-admins in perform_create, but keep IsAuthenticated
+            return [IsAuthenticated()]
+        if self.action == 'destroy':
+            return [IsAuthenticated(), IsAdmin()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         user = self.request.user
