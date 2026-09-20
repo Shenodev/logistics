@@ -51,6 +51,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'accounts',
+    'orders',
+    'invoices',
+    'fleet',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
