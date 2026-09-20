@@ -83,6 +83,13 @@ class Order(models.Model):
     )
     refund_id = models.CharField(max_length=64, null=True, blank=True)
     invoice_id = models.CharField(max_length=20, null=True, blank=True)
+    stripe_payment_intent_id = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text='Original Visa PaymentIntent (pi_...) for Stripe refund',
+    )
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -153,6 +160,11 @@ class Order(models.Model):
                 pass
 
     def save(self, *args, **kwargs):
+        # Auto-generate mock Visa PaymentIntent for new orders (for refund demo)
+        if not self.stripe_payment_intent_id:
+            # Deterministic mock PI based on order_number for idempotency
+            suffix = self.order_number.replace('-', '').lower()[-12:] or 'test'
+            self.stripe_payment_intent_id = f'pi_{suffix}_mock_visa'
         # Auto-populate cancellation / refund metadata when transitioning to cancelled
         if self.status == self.Status.CANCELLED:
             if not self.cancelled_at:

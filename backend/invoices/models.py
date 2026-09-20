@@ -47,6 +47,13 @@ class Invoice(models.Model):
     due_date = models.DateField(null=True, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
     refund_id = models.CharField(max_length=64, null=True, blank=True, help_text='Stripe refund ID if refunded')
+    stripe_payment_intent_id = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text='Original Visa PaymentIntent (pi_...) for refund',
+    )
     description = models.CharField(max_length=200, blank=True, help_text='e.g. Ocean Freight · SHP-10001-ORD')
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)

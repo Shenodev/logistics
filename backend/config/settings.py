@@ -199,6 +199,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 
+# Stripe — Visa refunds for cancelled orders (Admin only)
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+STRIPE_API_VERSION = os.environ.get('STRIPE_API_VERSION', '2024-06-20')
+
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
