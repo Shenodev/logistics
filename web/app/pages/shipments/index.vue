@@ -8,7 +8,12 @@ useSeoMeta({
   description: 'Browse every consignment on your account — track shipments and view chain of custody.',
 })
 
-const { list } = useShipments()
+const { list, fetchOrders, isLoading } = useShipments()
+
+// Connect user portal to Django DRF via $fetch (HttpOnly JWT cookie, credentials:include)
+onMounted(() => {
+  fetchOrders()
+})
 
 const statusFilter = ref<'all' | ShipmentStatus>('all')
 

@@ -6,10 +6,25 @@ definePageMeta({ layout: 'user', middleware: 'auth' })
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
-const { get: findShipment, cancelOrder } = useShipments()
+const { get: findShipment, fetchOrder, cancelOrder } = useShipments()
 
 const shipment = computed(() => findShipment(String(route.params.id ?? '')))
 const isAdmin = computed(() => auth.isAdmin)
+
+// Connect to Django DRF and ensure driver's status update instantly reflects on user's timeline via polling
+onMounted(() => {
+  const id = String(route.params.id ?? '')
+  if (id) fetchOrder(id)
+  const interval = setInterval(() => {
+    const curId = String(route.params.id ?? '')
+    if (curId) fetchOrder(curId)
+  }, 5000)
+  onUnmounted(() => clearInterval(interval))
+})
+
+watch(() => route.params.id, (newId) => {
+  if (newId) fetchOrder(String(newId))
+})
 
 useSeoMeta({
   title: () => shipment.value ? `${shipment.value.id} · Tracking` : 'Shipment not found',
@@ -39,15 +54,16 @@ function closeCancelDialog() {
 async function confirmCancel() {
   if (!shipment.value || cancelling.value) return
   cancelling.value = true
-  // Simulate async cancellation — flags for Stripe refund, stays as cancelled
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  const ok = cancelOrder(shipment.value.id)
+  // Use $fetch to call Django DRF cancel endpoint (HttpOnly JWT) — strict Stage 1 validation on backend
+  const ok = await cancelOrder(shipment.value.id)
   cancelling.value = false
   showCancelConfirm.value = false
   if (ok) {
     cancelSuccess.value = true
     // Stay on page to show refund management — do not redirect
     setTimeout(() => (cancelSuccess.value = false), 4000)
+    // Ensure timeline reflects via refetch (polling will also update)
+    fetchOrder(shipment.value.id)
   }
 }
 

@@ -5,9 +5,18 @@ definePageMeta({ layout: 'delivery', middleware: 'auth' })
 
 const route = useRoute()
 const router = useRouter()
-const { get, updateDeliveryStatus } = useShipments()
+const { get, fetchOrder, updateDeliveryStatus } = useShipments()
 
 const shipment = computed(() => get(String(route.params.id ?? '')))
+
+// API integration: fetch order via Django DRF (HttpOnly JWT) for delivery subdomain
+onMounted(() => {
+  const id = String(route.params.id ?? '')
+  if (id) fetchOrder(id)
+})
+watch(() => route.params.id, (newId) => {
+  if (newId) fetchOrder(String(newId))
+})
 
 useSeoMeta({
   title: () => shipment.value ? `${shipment.value.id} — Active Order` : 'Order not found',
@@ -42,12 +51,16 @@ function showToast(msg: string) {
 async function advanceStatus() {
   if (!shipment.value || !nextAction.value || updating.value) return
   updating.value = true
-  await new Promise((r) => setTimeout(r, 400))
-  const ok = updateDeliveryStatus(shipment.value!.id, nextAction.value!.next)
+  const next = nextAction.value.next
+  const ok = await updateDeliveryStatus(shipment.value!.id, next)
   updating.value = false
   if (ok) {
     if ('vibrate' in navigator) navigator.vibrate(30)
-    showToast(`Status: ${deliveryLabel[nextAction.value!.next as DeliveryStatus]}`)
+    showToast(`Status: ${deliveryLabel[next as DeliveryStatus]}`)
+    // Ensure user tracking timeline will see update on next poll (instant via API)
+    await fetchOrder(shipment.value!.id)
+  } else {
+    showToast('Update failed — not assigned or invalid transition')
   }
 }
 

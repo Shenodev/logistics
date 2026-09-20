@@ -16,12 +16,14 @@ class OrderSerializer(serializers.ModelSerializer):
             'status', 'status_display',
             'origin', 'origin_code', 'destination', 'destination_code',
             'mode', 'priority', 'gross_weight',
-            'cancelled_at', 'cancelled_by', 'refund_status', 'refund_id', 'invoice_id',
+            'customer_phone', 'restaurant_name', 'restaurant_address',
+            'delivery_status', 'delivery_updated_at',
+            'cancelled_at', 'cancelled_by', 'refund_status', 'refund_id', 'invoice_id', 'stripe_payment_intent_id',
             'created_at', 'updated_at',
         ]
         read_only_fields = [
             'id', 'owner', 'cancelled_at', 'cancelled_by',
-            'refund_status', 'refund_id', 'invoice_id',
+            'refund_status', 'refund_id', 'invoice_id', 'stripe_payment_intent_id',
             'created_at', 'updated_at', 'status_display',
             'owner_email', 'driver_email',
         ]
@@ -32,6 +34,12 @@ class OrderSerializer(serializers.ModelSerializer):
         if mapped not in dict(Order.Status.choices):
             raise serializers.ValidationError(f'Invalid status {value}')
         return mapped
+
+    def validate_delivery_status(self, value):
+        allowed = {'assigned', 'picked_up', 'on_the_way', 'delivered'}
+        if value not in allowed:
+            raise serializers.ValidationError(f'Invalid delivery_status {value}')
+        return value
 
     def validate(self, attrs):
         # On update, enforce state-machine via model clean
@@ -47,4 +55,11 @@ class OrderSerializer(serializers.ModelSerializer):
                 })
             if status == Order.Status.CANCELLED and tmp.status != Order.Status.RECEIVED:
                 raise serializers.ValidationError({'status': 'Only orders in Stage 1 (Received) can be cancelled'})
+        delivery_status = attrs.get('delivery_status')
+        if self.instance and delivery_status and delivery_status != self.instance.delivery_status:
+            if not self.instance.can_transition_delivery(delivery_status):
+                allowed = ', '.join(sorted(self.instance.DELIVERY_ALLOWED.get(self.instance.delivery_status, set()))) or 'none'
+                raise serializers.ValidationError({
+                    'delivery_status': f'Invalid delivery transition {self.instance.delivery_status} -> {delivery_status}. Allowed: {allowed}'
+                })
         return attrs

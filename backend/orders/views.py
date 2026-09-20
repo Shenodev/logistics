@@ -129,9 +129,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         if order.driver_id == user.id and order.status == Order.Status.PICKED_UP:
             return Response({'detail': 'Order already accepted.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Assign and transition to picked_up
+        # Assign and transition to picked_up (both main status and delivery_status)
         order.driver = user
         order.status = Order.Status.PICKED_UP
+        order.delivery_status = 'picked_up'
         try:
             order.save()
         except Exception as e:

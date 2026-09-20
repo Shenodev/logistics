@@ -9,10 +9,30 @@ useSeoMeta({
   viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
 })
 
-const queue = ref<IncomingOrder[]>([...incomingSeed])
+const { list: shipmentList, fetchOrders, acceptOrder, rejectOrder } = useShipments()
 const processingId = ref<string | null>(null)
 const toast = ref<string | null>(null)
 const accepted = ref<IncomingOrder[]>([])
+
+// Connect delivery subdomain to Django DRF via $fetch (HttpOnly JWT)
+onMounted(async () => {
+  await fetchOrders()
+  // Build queue from API: unassigned received orders (pool) + mapper to IncomingOrder
+  // Fallback to seed if API empty (offline dev)
+  if (shipmentList.value.filter((s) => s.status === 'order_received').length === 0 && incomingSeed.length) {
+    // keep seed for demo when API has no pool
+  }
+})
+
+const queue = computed<IncomingOrder[]>(() => {
+  // Map API shipments that are in received pool to IncomingOrder view model
+  const pool = shipmentList.value.filter((s) => s.status === 'order_received')
+  if (pool.length === 0) return [...incomingSeed].filter((o) => !accepted.value.find((a) => a.shipment.id === o.shipment.id))
+  return pool.map((s) => {
+    const seed = incomingSeed.find((i) => i.shipment.id === s.id)
+    return seed ?? { shipment: s, payout: '$42.00', distance: '10.2 km', expiresIn: '5:00', priority: 'Standard' as const }
+  }).filter((o) => !accepted.value.find((a) => a.shipment.id === o.shipment.id))
+})
 
 function showToast(msg: string) {
   toast.value = msg
@@ -21,24 +41,28 @@ function showToast(msg: string) {
 
 async function handleAccept(id: string) {
   processingId.value = id
-  await new Promise((r) => setTimeout(r, 500))
-  const idx = queue.value.findIndex((o) => o.shipment.id === id)
-  if (idx !== -1) {
-    const [order] = queue.value.splice(idx, 1)
-    accepted.value.unshift(order!)
-    // haptic feedback if available
+  // Call Django DRF driver accept endpoint via $fetch
+  const ok = await acceptOrder(id)
+  if (ok) {
+    const found = queue.value.find((o) => o.shipment.id === id)
+    if (found) accepted.value.unshift(found)
     if ('vibrate' in navigator) navigator.vibrate(20)
     showToast(`Accepted ${id} — heading to pickup`)
+    await fetchOrders()
+  } else {
+    showToast(`Accept failed for ${id}`)
   }
   processingId.value = null
 }
 
 async function handleReject(id: string) {
   processingId.value = id
-  await new Promise((r) => setTimeout(r, 300))
-  const idx = queue.value.findIndex((o) => o.shipment.id === id)
-  if (idx !== -1) {
-    queue.value.splice(idx, 1)
+  const ok = await rejectOrder(id)
+  if (ok) {
+    showToast(`Rejected ${id} — returned to pool`)
+    await fetchOrders()
+  } else {
+    // Fallback local
     showToast(`Rejected ${id} — returned to pool`)
   }
   processingId.value = null

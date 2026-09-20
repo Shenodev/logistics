@@ -38,8 +38,7 @@ class Order(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='orders',
-        limit_choices_to={'role': 'user'},
-        help_text='Customer who owns the order (role=user)',
+        help_text='Customer who owns the order',
     )
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -65,6 +64,18 @@ class Order(models.Model):
     mode = models.CharField(max_length=30, default='Ocean Freight')
     priority = models.CharField(max_length=30, default='Standard Freight')
     gross_weight = models.CharField(max_length=30, default='12,400 kg')
+    # Delivery-specific fields for API integration (Restaurant/Pickup & Customer/Dropoff + live status)
+    customer_phone = models.CharField(max_length=20, default='+1 (212) 555-0148')
+    restaurant_name = models.CharField(max_length=120, default='Rotterdam Hub Kitchen')
+    restaurant_address = models.CharField(max_length=200, default='Rotterdam, RTM • Bay 04 • Pickup Dock 4')
+    delivery_status = models.CharField(
+        max_length=20,
+        choices=[('assigned', 'Assigned'), ('picked_up', 'Picked Up'), ('on_the_way', 'On the Way'), ('delivered', 'Delivered')],
+        default='assigned',
+        db_index=True,
+        help_text='Driver delivery status, cycles assigned→picked_up→on_the_way→delivered',
+    )
+    delivery_updated_at = models.DateTimeField(null=True, blank=True)
 
     # Cancellation / refund tracking (Stage 1 only)
     cancelled_at = models.DateTimeField(null=True, blank=True)
@@ -104,6 +115,13 @@ class Order(models.Model):
         Status.CANCELLED: set(),
     }
 
+    DELIVERY_ALLOWED: dict[str, set[str]] = {
+        'assigned': {'picked_up'},
+        'picked_up': {'on_the_way'},
+        'on_the_way': {'delivered'},
+        'delivered': set(),
+    }
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'order'
@@ -135,6 +153,9 @@ class Order(models.Model):
         allowed = self.ALLOWED_TRANSITIONS.get(self.status, set())
         return new_status in allowed
 
+    def can_transition_delivery(self, new: str) -> bool:
+        return new in self.DELIVERY_ALLOWED.get(self.delivery_status, set())
+
     def clean(self):
         # Enforce driver must be driver role if set
         if self.driver_id and getattr(self.driver, 'role', None) not in (None, 'driver'):
@@ -148,7 +169,11 @@ class Order(models.Model):
                     # Normalize legacy aliases for comparison
                     new_status = self.LEGACY_STATUS_MAP.get(self.status, self.status)
                     old_status = self.LEGACY_STATUS_MAP.get(old.status, old.status)
-                    if old_status != new_status and not old.can_transition(new_status):
+                    # Allow delivery completion to sync main status to delivered even from in_transit (bypass intermediate)
+                    is_delivery_completion = (
+                        self.delivery_status == 'delivered' and new_status == self.Status.DELIVERED
+                    )
+                    if old_status != new_status and not is_delivery_completion and not old.can_transition(new_status):
                         raise ValidationError({
                             'status': f'Invalid transition {old.get_status_display()} -> {self.get_status_display()}. '
                                       f'Allowed: {", ".join(sorted(old.ALLOWED_TRANSITIONS.get(old.status, set()))) or "none (terminal)"}'
@@ -156,6 +181,12 @@ class Order(models.Model):
                     # Extra guard: cancellation only from Stage 1
                     if new_status == self.Status.CANCELLED and old_status != self.Status.RECEIVED:
                         raise ValidationError({'status': 'Only orders in Stage 1 (Received) can be cancelled'})
+                if old.delivery_status != self.delivery_status:
+                    if not old.can_transition_delivery(self.delivery_status):
+                        raise ValidationError({
+                            'delivery_status': f'Invalid delivery transition {old.delivery_status} -> {self.delivery_status}. '
+                                               f'Allowed: {", ".join(sorted(old.DELIVERY_ALLOWED.get(old.delivery_status, set()))) or "none"}'
+                        })
             except type(self).DoesNotExist:
                 pass
 
@@ -175,5 +206,30 @@ class Order(models.Model):
             if not self.invoice_id:
                 # Generate invoice id if missing
                 self.invoice_id = f'INV-{self.order_number[-4:]}' if len(self.order_number) >= 4 else 'INV-0000'
+        # Auto-update delivery timestamp when delivery_status changes and sync main status for user timeline
+        if self.pk:
+            try:
+                old = type(self).objects.get(pk=self.pk)
+                if old.delivery_status != self.delivery_status:
+                    from django.utils import timezone
+                    self.delivery_updated_at = timezone.now()
+                    # Sync main order status for user tracking timeline (instant reflect via polling)
+                    delivery_to_status = {
+                        'picked_up': self.Status.PICKED_UP,
+                        'on_the_way': self.Status.IN_TRANSIT,
+                        'delivered': self.Status.DELIVERED,
+                    }
+                    mapped = delivery_to_status.get(self.delivery_status)
+                    if mapped and mapped != self.status:
+                        # Allow delivery completion to set main status to delivered even if intermediate
+                        if mapped == self.Status.DELIVERED:
+                            self.status = mapped
+                        elif old.can_transition(mapped):
+                            self.status = mapped
+            except type(self).DoesNotExist:
+                pass
+        elif self.delivery_status != 'assigned':
+            from django.utils import timezone
+            self.delivery_updated_at = timezone.now()
         self.full_clean(exclude=None)
         super().save(*args, **kwargs)
