@@ -53,6 +53,10 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
+AUTH_USER_MODEL = 'accounts.User'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 APPEND_SLASH = False
 
 MIDDLEWARE = [

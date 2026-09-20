@@ -14,11 +14,17 @@ User = get_user_model()
 
 
 def user_payload(user):
+    # Prefer explicit role field; fall back to is_staff for legacy data
+    raw_role = getattr(user, 'role', None)
+    if raw_role in ('user', 'admin', 'driver'):
+        role = raw_role
+    else:
+        role = 'admin' if getattr(user, 'is_staff', False) else 'user'
     return {
         'id': str(user.id),
         'email': user.email,
         'name': user.first_name or user.email,
-        'role': 'admin' if user.is_staff else 'user',
+        'role': role,
     }
 
 
@@ -107,6 +113,15 @@ def signup_view(request):
     name = str(request.data.get('name') or '').strip()
     email = str(request.data.get('email') or '').strip().lower()
     password = str(request.data.get('password') or '')
+    # Role-aware signup: delivery PWA posts driver role, portal defaults to user
+    requested_role = str(request.data.get('role') or '').strip().lower()
+    # Also support legacy `delivery` hint from client
+    if not requested_role and 'driver' in request.headers.get('X-Portal', '').lower():
+        requested_role = 'driver'
+    role = requested_role if requested_role in ('user', 'driver') else 'user'
+    # Never allow public signup to create admin
+    if role == 'admin':
+        role = 'user'
 
     if not name or not email or not password:
         return Response(
@@ -122,6 +137,7 @@ def signup_view(request):
     reserved = {
         os.environ.get('DJANGO_DEV_ADMIN_EMAIL', 'admin@sheno.dev'),
         os.environ.get('DJANGO_DEV_USER_EMAIL', 'user@sheno.dev'),
+        os.environ.get('DJANGO_DEV_DRIVER_EMAIL', 'driver@sheno.dev'),
     }
     if email in reserved or User.objects.filter(email=email).exists():
         return Response(
@@ -135,6 +151,7 @@ def signup_view(request):
             email=email,
             password=password,
             first_name=name,
+            role=role,
         )
     except Exception:
         return Response(

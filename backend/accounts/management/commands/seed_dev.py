@@ -16,6 +16,7 @@ class Command(BaseCommand):
                 'email': os.environ.get('DJANGO_DEV_ADMIN_EMAIL', 'admin@sheno.dev'),
                 'first_name': 'Sheno Admin',
                 'password': os.environ.get('DJANGO_DEV_ADMIN_PASSWORD', 'admin123'),
+                'role': 'admin',
                 'is_staff': True,
             },
             {
@@ -23,20 +24,31 @@ class Command(BaseCommand):
                 'email': os.environ.get('DJANGO_DEV_USER_EMAIL', 'user@sheno.dev'),
                 'first_name': 'Sheno User',
                 'password': os.environ.get('DJANGO_DEV_USER_PASSWORD', 'user123'),
+                'role': 'user',
+                'is_staff': False,
+            },
+            {
+                'username': os.environ.get('DJANGO_DEV_DRIVER_EMAIL', 'driver@sheno.dev'),
+                'email': os.environ.get('DJANGO_DEV_DRIVER_EMAIL', 'driver@sheno.dev'),
+                'first_name': 'Sheno Driver',
+                'password': os.environ.get('DJANGO_DEV_DRIVER_PASSWORD', 'driver123'),
+                'role': 'driver',
                 'is_staff': False,
             },
         ]
 
         for data in users:
             password = data.pop('password')
-            is_staff = data.pop('is_staff')
-            user, created = User.objects.get_or_create(username=data['username'], defaults=data)
+            role = data.pop('role', 'user')
+            is_staff = data.pop('is_staff', False)
+            user, created = User.objects.get_or_create(username=data['username'], defaults={**data, 'role': role, 'is_staff': is_staff})
             if not created:
                 for key, value in data.items():
                     setattr(user, key, value)
-            user.is_staff = is_staff
+                user.role = role
+            user.is_staff = is_staff or role == 'admin'
             user.set_password(password)
             user.save()
 
             action = 'Created' if created else 'Updated'
-            self.stdout.write(self.style.SUCCESS(f'{action} {data["username"]} (role: {"admin" if is_staff else "user"})'))
+            self.stdout.write(self.style.SUCCESS(f'{action} {data["username"]} (role: {role})'))
