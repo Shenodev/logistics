@@ -232,4 +232,46 @@ class Order(models.Model):
             from django.utils import timezone
             self.delivery_updated_at = timezone.now()
         self.full_clean(exclude=None)
+        # Capture previous state for notification (before super().save sets pk for creates)
+        is_new = self._state.adding
+        old_status = None
+        old_delivery = None
+        if not is_new and self.pk:
+            try:
+                _old = type(self).objects.get(pk=self.pk)
+                old_status = _old.status
+                old_delivery = _old.delivery_status
+            except type(self).DoesNotExist:
+                pass
         super().save(*args, **kwargs)
+        # Real-time notifications: push on status / delivery_status transitions (Created -> Preparing -> Dispatched -> Delivered)
+        # Only for updates, not initial creation (except cancelled initial is still a transition from None)
+        try:
+            new_status = self.status
+            new_delivery = self.delivery_status
+            # Determine if this is a meaningful transition
+            should_notify = False
+            notify_from = None
+            notify_to = None
+            notify_kind = 'order_status'
+            if not is_new and old_status and old_status != new_status:
+                should_notify = True
+                notify_from = old_status
+                notify_to = new_status
+            elif not is_new and old_delivery and old_delivery != new_delivery:
+                should_notify = True
+                notify_from = old_delivery
+                notify_to = new_delivery
+                notify_kind = 'order_status'
+            elif is_new and new_status in ('received', 'cancelled'):
+                # Optional: notify on creation as "Created"
+                should_notify = False
+            if should_notify and notify_from and notify_to:
+                from notifications.utils import notify_order_transition
+                # Run in try to not block save on notification failure
+                try:
+                    notify_order_transition(self, notify_from, notify_to, kind=notify_kind)
+                except Exception:
+                    pass
+        except Exception:
+            pass

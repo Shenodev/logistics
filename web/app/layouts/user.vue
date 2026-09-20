@@ -143,9 +143,7 @@ async function logout() {
       </div>
 
       <div class="flex items-center gap-4">
-        <button class="rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" title="Notifications">
-          <MIcon name="notifications" class="text-[20px]" />
-        </button>
+        <NotificationsNotificationBell />
         <NuxtLink to="/profile" class="hidden rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary sm:inline-flex" title="Help">
           <MIcon name="help_outline" class="text-[20px]" />
         </NuxtLink>
@@ -161,5 +159,6 @@ async function logout() {
         Sheno B2B Logistics
       </footer>
     </div>
+    <NotificationsNotificationToast />
   </div>
 </template>

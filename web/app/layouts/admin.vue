@@ -21,6 +21,7 @@ async function logout() {
         </nav>
         <div class="flex items-center gap-3">
           <Badge class="bg-primary text-primary-foreground">Command Center</Badge>
+          <NotificationsNotificationBell />
           <div class="hidden items-center gap-2 sm:flex">
             <div class="flex size-8 items-center justify-center rounded-full border border-outline-variant bg-surface-container-highest text-label-sm font-bold text-primary">
               {{ auth.user?.name?.charAt(0)?.toUpperCase() || 'A' }}
@@ -45,6 +46,7 @@ async function logout() {
     <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
       <slot />
     </main>
+    <NotificationsNotificationToast />
 
     <footer class="mt-auto border-t border-border py-4 text-center text-xs text-muted-foreground">
       Dispatcher / Admin Console
