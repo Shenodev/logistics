@@ -207,6 +207,16 @@ def create_refund(request):
         logger.exception('Refund DB update failed for %s', order.order_number)
         return Response({'detail': f'Database update failed: {exc}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # Trigger transactional email: Visa refund processed (from hello@contact.logistics.shenodev.tech)
+    try:
+        from utils.emails import send_refund_processed_email
+        # Refresh for email context
+        order.refresh_from_db()
+        invoice.refresh_from_db()
+        send_refund_processed_email(order, invoice, refund_id=stripe_refund_id)
+    except Exception as e:
+        logger.warning("Failed to send refund email for %s: %s", order.order_number, e)
+
     return Response(
         {
             'detail': 'Visa refund issued via Stripe.',

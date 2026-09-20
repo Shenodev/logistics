@@ -10,6 +10,10 @@ from accounts.permissions import IsAdmin, IsAssignedDriverOrAdmin, IsDriverAssig
 from .models import Order
 from .serializers import OrderSerializer
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
@@ -87,6 +91,24 @@ class OrderViewSet(viewsets.ModelViewSet):
             order.save()
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Trigger transactional email: order cancelled (from hello@contact.logistics.shenodev.tech)
+        try:
+            from utils.emails import send_order_cancelled_email
+            # Refresh to ensure owner relation is available for email
+            order.refresh_from_db()
+            # Use select_related for owner email if needed, but order already has owner_id; fetch owner
+            if not hasattr(order, 'owner') or order.owner is None:
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                try:
+                    order.owner = User.objects.get(pk=order.owner_id)
+                except User.DoesNotExist:
+                    pass
+            send_order_cancelled_email(order)
+        except Exception as e:
+            # Email failure should not block cancellation
+            logger.warning("Failed to send cancelled email for %s: %s", order.order_number, e)
 
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)

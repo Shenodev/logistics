@@ -10,3 +10,4 @@ asgiref==3.12.1
 sqlparse==0.6.0
 tzdata
 stripe==12.5.1
+resend==2.13.0

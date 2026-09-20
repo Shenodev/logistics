@@ -204,6 +204,11 @@ STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 STRIPE_API_VERSION = os.environ.get('STRIPE_API_VERSION', '2024-06-20')
 
+# Resend — transactional emails (from hello@contact.logistics.shenodev.tech)
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', 'hello@contact.logistics.shenodev.tech')
+RESEND_FROM_NAME = os.environ.get('RESEND_FROM_NAME', 'Sheno Logistics')
+
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
