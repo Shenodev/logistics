@@ -87,10 +87,10 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # State machine: allowed forward transitions
+    # State machine: allowed forward transitions + driver reject revert
     ALLOWED_TRANSITIONS: dict[str, set[str]] = {
         Status.RECEIVED: {Status.PICKED_UP, Status.CANCELLED},
-        Status.PICKED_UP: {Status.IN_TRANSIT},
+        Status.PICKED_UP: {Status.IN_TRANSIT, Status.RECEIVED},  # RECEIVED via driver reject (return to pool)
         Status.IN_TRANSIT: {Status.OUT_FOR_DELIVERY},
         Status.OUT_FOR_DELIVERY: {Status.DELIVERED},
         Status.DELIVERED: set(),
