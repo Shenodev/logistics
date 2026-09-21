@@ -14,10 +14,12 @@ function orderRequest<T>(url: string, options: Record<string, unknown> = {}): Pr
   } as any)
 }
 
-// Map backend Order (received/picked_up/...) to frontend ShipmentStatus (order_received etc)
+// Map backend Order (processing/received/...) to frontend ShipmentStatus
 function mapBackendStatus(s: string): ShipmentStatus {
   if (s === 'received') return 'order_received'
-  if (s === 'picked_up') return 'order_received' // legacy alias, keep as received for timeline until in_transit
+  if (s === 'picked_up') return 'in_transit'
+  if (s === 'processing') return 'processing'
+  if (s === 'received_by_driver') return 'received_by_driver'
   return s as ShipmentStatus
 }
 
@@ -41,6 +43,12 @@ function mapShipmentFromOrder(order: any, fallback?: Shipment): Shipment | null 
     customerPhone: order.customer_phone ?? base.customerPhone,
     restaurantName: order.restaurant_name ?? base.restaurantName,
     restaurantAddress: order.restaurant_address ?? base.restaurantAddress,
+    // Dispatch & lock
+    is_locked: order.is_locked ?? (base as any).is_locked ?? false,
+    dispatch_status: order.dispatch_status ?? (base as any).dispatch_status ?? 'idle',
+    dispatch_in_progress: order.dispatch_in_progress ?? (base as any).dispatch_in_progress ?? false,
+    assigned_driver_name: order.assigned_driver_name ?? (base as any).assigned_driver_name ?? order.driver_name ?? '',
+    assigned_driver_phone: order.assigned_driver_phone ?? (base as any).assigned_driver_phone ?? order.driver_phone ?? '',
     // Keep other fields from backend if present
     origin: order.origin ?? base.origin,
     originCode: order.origin_code ?? base.originCode,
@@ -52,6 +60,12 @@ function mapShipmentFromOrder(order: any, fallback?: Shipment): Shipment | null 
       refundStatus: order.refund_status ?? base.refundStatus,
       refundId: order.refund_id ?? base.refundId,
       invoiceId: order.invoice_id ?? base.invoiceId,
+    } : {}),
+    // For received_by_driver, ensure driver fields
+    ...(order.status === 'received_by_driver' ? {
+      assigned_driver_name: order.assigned_driver_name ?? order.driver_name ?? base.assigned_driver_name,
+      assigned_driver_phone: order.assigned_driver_phone ?? order.driver_phone ?? base.assigned_driver_phone,
+      is_locked: true,
     } : {}),
   }
   // Recompute derived timeline fields if status changed
@@ -350,8 +364,22 @@ export function useShipments() {
     }
   }
 
+  async function markReady(id: string): Promise<boolean> {
+    const key = id.trim().toUpperCase()
+    try {
+      const res = await orderRequest<any>(`/api/orders/${encodeURIComponent(key)}/ready/`, { method: 'POST' })
+      const mapped = mapShipmentFromOrder(res, get(key))
+      if (mapped && get(key)) Object.assign(get(key)!, mapped)
+      else if (get(key) && res) Object.assign(get(key)!, { dispatch_status: res.dispatch_status, dispatch_in_progress: res.dispatch_in_progress } as any)
+      return true
+    } catch (e: any) {
+      lastError.value = e?.data?.detail || 'Ready failed'
+      return false
+    }
+  }
+
   return {
-    list, get, remove, cancelOrder, issueRefund, updateDeliveryStatus, acceptOrder, rejectOrder,
+    list, get, remove, cancelOrder, issueRefund, updateDeliveryStatus, acceptOrder, rejectOrder, markReady,
     fetchOrders, fetchOrder,
     isLoading, lastError,
   }

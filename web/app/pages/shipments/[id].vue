@@ -6,7 +6,7 @@ definePageMeta({ layout: 'user', middleware: 'auth' })
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
-const { get: findShipment, fetchOrder, cancelOrder } = useShipments()
+const { get: findShipment, fetchOrder, cancelOrder, markReady } = useShipments()
 
 const shipment = computed(() => findShipment(String(route.params.id ?? '')))
 const isAdmin = computed(() => auth.isAdmin)
@@ -33,14 +33,28 @@ useSeoMeta({
     : 'The requested shipment could not be found.',
 })
 
-const statusLabel = computed(() => shipment.value ? STATUS_FLOW[shipment.value.status].label : '')
+const statusLabel = computed(() => shipment.value ? (STATUS_FLOW[shipment.value.status as any]?.label ?? shipment.value.status) : '')
 
-// Vue conditional rendering: only Stage 1 "Order Received" is cancellable
-const canCancel = computed(() => shipment.value ? canCancelOrder(shipment.value) : false)
+// Vue conditional rendering: only Stage 1 "Order Received" is cancellable, and never when locked
+const canCancel = computed(() => {
+  if (!shipment.value) return false
+  if ((shipment.value as any).is_locked) return false
+  return canCancelOrder(shipment.value as any)
+})
+const isLocked = computed(() => !!(shipment.value as any)?.is_locked)
+const isProcessing = computed(() => shipment.value?.status === 'processing')
+const canReady = computed(() => isProcessing.value && isAdmin.value && !(shipment.value as any)?.dispatch_in_progress)
+const dispatchInProgress = computed(() => !!(shipment.value as any)?.dispatch_in_progress)
+const assignedDriverName = computed(() => (shipment.value as any)?.assigned_driver_name || (shipment.value as any)?.driver_name || '')
+const assignedDriverPhone = computed(() => (shipment.value as any)?.assigned_driver_phone || (shipment.value as any)?.driver_phone || (shipment.value as any)?.customerPhone || '')
+const driverVisible = computed(() => isLocked.value || shipment.value?.status === 'received_by_driver' || !!assignedDriverName.value)
 
 const showCancelConfirm = ref(false)
 const cancelling = ref(false)
 const cancelSuccess = ref(false)
+const markingReady = ref(false)
+const readySuccess = ref(false)
+const readyError = ref<string | null>(null)
 
 function requestCancel() {
   showCancelConfirm.value = true
@@ -64,6 +78,21 @@ async function confirmCancel() {
     setTimeout(() => (cancelSuccess.value = false), 4000)
     // Ensure timeline reflects via refetch (polling will also update)
     fetchOrder(shipment.value.id)
+  }
+}
+
+async function handleReady() {
+  if (!shipment.value || markingReady.value) return
+  markingReady.value = true
+  readyError.value = null
+  const ok = await markReady(shipment.value.id)
+  markingReady.value = false
+  if (ok) {
+    readySuccess.value = true
+    setTimeout(() => (readySuccess.value = false), 4000)
+    fetchOrder(shipment.value.id)
+  } else {
+    readyError.value = 'Failed to start dispatch. Order must be in Processing.'
   }
 }
 
@@ -125,13 +154,31 @@ function onRefundIssued(_refundId: string) {
             </div>
 
             <div class="flex flex-wrap items-center gap-2 self-start lg:self-center">
-              <!-- CRITICAL: Cancel Order — Vue conditional rendering (v-if) — only Stage 1 "Order Received" -->
+              <!-- Admin Ready — triggers Celery round-robin dispatch (Upstash Redis) -->
+              <button
+                v-if="canReady"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-label-md font-bold text-on-primary hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+                :disabled="markingReady"
+                @click="handleReady"
+              >
+                <MIcon name="rocket_launch" class="text-[18px]" />
+                {{ markingReady ? 'Dispatching…' : 'Ready — Dispatch' }}
+              </button>
+              <span v-if="dispatchInProgress" class="inline-flex items-center gap-1 rounded-full border border-tertiary/30 bg-tertiary-container/20 px-2.5 py-1 text-label-sm font-semibold text-tertiary">
+                <span class="h-2 w-2 animate-pulse rounded-full bg-tertiary" />
+                Dispatching…
+              </span>
+              <!-- CRITICAL: Cancel Order — disabled globally when locked (after Received by Driver) -->
               <ShipmentCancelOrderButton
                 v-if="canCancel"
                 :shipment="shipment"
                 :loading="cancelling"
                 @cancel="requestCancel"
               />
+              <span v-if="isLocked" class="inline-flex items-center gap-1 rounded-lg border border-outline-variant bg-surface-low px-3 py-2 text-label-sm font-medium text-outline">
+                <MIcon name="lock" class="text-[16px]" />
+                Locked — Received by Driver
+              </span>
               <button class="flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-low px-3 py-2 text-label-md text-on-surface transition-colors hover:border-primary hover:bg-surface-container-high active:scale-[0.98]">
                 <MIcon name="picture_as_pdf" class="text-[18px] text-primary" />
                 <span>Download Waybill (PDF)</span>
@@ -145,6 +192,49 @@ function onRefundIssued(_refundId: string) {
                 <span>Contact Freight Specialist</span>
               </button>
             </div>
+          </div>
+          <!-- Ready / dispatch feedback -->
+          <div v-if="readySuccess" class="mt-3 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-body-sm font-medium text-primary">
+            <MIcon name="check_circle" class="text-[18px]" />
+            Dispatch started — alerting drivers in round-robin via Celery + Upstash Redis.
+          </div>
+          <div v-if="readyError" class="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-body-sm text-destructive">
+            {{ readyError }}
+          </div>
+          <div v-if="dispatchInProgress" class="mt-2 flex items-center gap-1.5 text-label-sm font-medium text-tertiary">
+            <MIcon name="hourglass_top" class="text-[16px]" />
+            <span>Automated dispatch in progress — admins cannot manually intervene until driver responds.</span>
+          </div>
+        </section>
+
+        <!-- Accepted driver visibility — exposed to User and Admin after Accept (Received by Driver) -->
+        <section v-if="driverVisible" class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+          <div class="flex items-center gap-2">
+            <div class="flex size-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+              <MIcon name="local_shipping" class="text-[18px]" />
+            </div>
+            <div>
+              <h3 class="font-heading text-label-md font-bold text-emerald-700">Assigned Driver — Received by Driver</h3>
+              <p class="text-body-sm text-on-surface-variant">Visible to you and Admin • Order is now locked</p>
+            </div>
+            <span class="ml-auto rounded-full bg-emerald-500 px-2.5 py-1 text-label-sm font-bold text-white">Locked</span>
+          </div>
+          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div class="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-white px-3 py-2">
+              <MIcon name="person" class="text-[18px] text-emerald-600" />
+              <div>
+                <div class="text-label-sm uppercase tracking-wider text-on-surface-variant">Driver Name</div>
+                <div class="font-label-md font-bold text-on-surface">{{ assignedDriverName || 'Assigned Driver' }}</div>
+              </div>
+            </div>
+            <a :href="`tel:${(assignedDriverPhone || '').replace(/[^+\d]/g, '')}`" class="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 hover:bg-primary/20 transition-colors">
+              <MIcon name="call" class="text-[18px] text-primary" />
+              <div>
+                <div class="text-label-sm uppercase tracking-wider text-on-surface-variant">Phone</div>
+                <div class="font-mono text-label-md font-bold text-primary">{{ assignedDriverPhone || '—' }}</div>
+              </div>
+              <span class="ml-auto text-label-sm font-semibold text-primary">Call</span>
+            </a>
           </div>
         </section>
 

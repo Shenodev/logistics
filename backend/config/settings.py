@@ -205,6 +205,21 @@ STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 STRIPE_API_VERSION = os.environ.get('STRIPE_API_VERSION', '2024-06-20')
 
+# Celery + Upstash Redis — automated driver dispatch (round-robin with timeout)
+# Upstash Redis URL is provided as REDIS_URL or UPSTASH_REDIS_URL (rediss://...)
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL') or os.environ.get('UPSTASH_REDIS_URL') or os.environ.get('REDIS_URL', 'memory://')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND') or os.environ.get('UPSTASH_REDIS_URL') or os.environ.get('REDIS_URL', 'cache+memory://')
+CELERY_TASK_ALWAYS_EAGER = os.environ.get('CELERY_TASK_ALWAYS_EAGER', 'false').lower() == 'true'
+# For local dev without Redis, eager mode runs tasks synchronously (no broker needed)
+if CELERY_BROKER_URL in ('memory://', '', None):
+    CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 # Resend — transactional emails (from hello@contact.logistics.shenodev.tech)
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', 'hello@contact.logistics.shenodev.tech')

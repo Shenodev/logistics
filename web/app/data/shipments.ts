@@ -1,14 +1,16 @@
-export type ShipmentStatus = 'order_received' | 'booked' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled'
+export type ShipmentStatus = 'processing' | 'order_received' | 'booked' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'received_by_driver'
 
 /**
  * Stage 1 canonical status is `order_received` ("Order Received" / "استلام الطلب").
  * `booked` is kept as a legacy alias for backward compatibility — both map to Stage 1.
+ * New dispatch flow: processing (قيد التنفيذ) is initial, received_by_driver is after Accept (locked).
  */
 export function isCancellableStatus(status: ShipmentStatus): boolean {
-  return status === 'order_received' || status === 'booked'
+  return status === 'processing' || status === 'order_received' || status === 'booked'
 }
 
-export function canCancelOrder(shipment: { status: ShipmentStatus }): boolean {
+export function canCancelOrder(shipment: { status: ShipmentStatus; is_locked?: boolean }): boolean {
+  if ((shipment as any).is_locked) return false
   return isCancellableStatus(shipment.status)
 }
 
@@ -92,18 +94,27 @@ export interface Shipment {
   restaurantAddress: string
   deliveryStatus: DeliveryStatus
   deliveryUpdatedAt?: string | null
+  // dispatch engine
+  is_locked?: boolean
+  dispatch_status?: string
+  dispatch_in_progress?: boolean
+  assigned_driver_name?: string
+  assigned_driver_phone?: string
 }
 
 export const STATUS_FLOW: Record<ShipmentStatus, { label: string; index: number }> = {
-  order_received: { label: 'Order Received', index: 0 },
-  booked: { label: 'Order Received', index: 0 },
-  in_transit: { label: 'In Transit', index: 2 },
-  out_for_delivery: { label: 'Out for Delivery', index: 3 },
-  delivered: { label: 'Delivered', index: 4 },
+  processing: { label: 'Processing (قيد التنفيذ)', index: 0 },
+  order_received: { label: 'Order Received', index: 1 },
+  booked: { label: 'Order Received', index: 1 },
+  received_by_driver: { label: 'Received by Driver', index: 2 },
+  in_transit: { label: 'In Transit', index: 3 },
+  out_for_delivery: { label: 'Out for Delivery', index: 4 },
+  delivered: { label: 'Delivered', index: 5 },
   cancelled: { label: 'Cancelled', index: 0 },
 }
 
 const STEP_LABELS = [
+  { label: 'Processing (قيد التنفيذ)', icon: 'hourglass_top' },
   { label: 'Order Received', icon: 'receipt_long' },
   { label: 'Picked Up & Origin Hub', icon: 'check' },
   { label: 'In Transit', icon: 'airplanemode_active' },
@@ -112,6 +123,10 @@ const STEP_LABELS = [
 ]
 
 const STEP_DETAILS: Record<ShipmentStatus, { detail: string[]; time: string[] }> = {
+  processing: {
+    detail: ['Order Processing (قيد التنفيذ)', 'Awaiting Admin Ready', 'Dispatch Queued', 'Upcoming', 'Consignee Sign-off'],
+    time: ['Oct 24 • 14:30', 'Pending Admin Ready', 'Est. Oct 28', 'Est. Oct 29 • 09:00', 'Est. Oct 29 • 16:30'],
+  },
   order_received: {
     detail: ['Booking Confirmed', 'Carrier Assigned', 'Expected Soon', 'Upcoming', 'Consignee Sign-off'],
     time: ['Oct 24 • 14:32', 'Oct 25 • 08:15', 'Est. Oct 28', 'Est. Oct 29 • 09:00', 'Est. Oct 29 • 16:30'],
@@ -119,6 +134,10 @@ const STEP_DETAILS: Record<ShipmentStatus, { detail: string[]; time: string[] }>
   booked: {
     detail: ['Booking Confirmed', 'Carrier Assigned', 'Expected Soon', 'Upcoming', 'Consignee Sign-off'],
     time: ['Oct 24 • 14:32', 'Oct 25 • 08:15', 'Est. Oct 28', 'Est. Oct 29 • 09:00', 'Est. Oct 29 • 16:30'],
+  },
+  received_by_driver: {
+    detail: ['Order Received by Driver', 'Driver Assigned', 'En Route to Pickup', 'On the Way', 'Consignee Sign-off'],
+    time: ['Oct 24 • 14:32', 'Oct 24 • 14:40', 'Oct 24 • 14:45', 'Est. Oct 29 • 09:00', 'Est. Oct 29 • 16:30'],
   },
   cancelled: {
     detail: ['Order Cancelled — Refund Pending', 'Carrier Released', 'Refund Queued', 'Awaiting Admin Visa Refund', 'Closed'],
@@ -143,15 +162,15 @@ function milestonesFor(status: ShipmentStatus): Milestone[] {
   return STEP_LABELS.map((step, i) => ({
     label: step.label,
     icon: step.icon,
-    detail: STEP_DETAILS[status].detail[i],
-    time: STEP_DETAILS[status].time[i],
+    detail: STEP_DETAILS[status]?.detail?.[i] ?? step.label,
+    time: STEP_DETAILS[status]?.time?.[i] ?? '—',
     state: i < idx ? 'done' : i === idx ? 'active' : 'upcoming',
   }))
 }
 
 function timelineFillPct(status: ShipmentStatus): number {
   const idx = STATUS_FLOW[status].index
-  return Math.round((idx / 4) * 100)
+  return Math.round((idx / 5) * 100)
 }
 
 interface ShipmentSeed {
@@ -274,7 +293,7 @@ export const shipments: Shipment[] = [
   buildShipment({
     id: 'SHP-10001-ORD',
     mode: 'Ocean Freight',
-    status: 'order_received',
+    status: 'processing',
     priority: 'Standard Freight',
     origin: 'Rotterdam',
     originCode: 'RTM',
@@ -305,7 +324,7 @@ export const shipments: Shipment[] = [
   buildShipment({
     id: 'SHP-10002-ORD',
     mode: 'Intermodal',
-    status: 'order_received',
+    status: 'processing',
     priority: 'Express Air & Intermodal',
     origin: 'Jersey City Port',
     originCode: 'JCP',
@@ -336,7 +355,7 @@ export const shipments: Shipment[] = [
   buildShipment({
     id: 'SHP-10003-ORD',
     mode: 'Ground Fleet',
-    status: 'order_received',
+    status: 'processing',
     priority: 'Standard Freight',
     origin: 'Newark Airport Hub',
     originCode: 'EWR',

@@ -15,17 +15,29 @@ class Order(models.Model):
     """
 
     class Status(models.TextChoices):
+        PROCESSING = 'processing', 'Processing (قيد التنفيذ) — Stage 0'
         RECEIVED = 'received', 'Received (Stage 1 — استلام الطلب)'
         PICKED_UP = 'picked_up', 'Picked Up (Stage 2)'
         IN_TRANSIT = 'in_transit', 'In Transit (Stage 3)'
         OUT_FOR_DELIVERY = 'out_for_delivery', 'Out for Delivery (Stage 4)'
         DELIVERED = 'delivered', 'Delivered (Stage 5)'
         CANCELLED = 'cancelled', 'Cancelled'
+        RECEIVED_BY_DRIVER = 'received_by_driver', 'Received by Driver (مستلم من السائق)'
 
-    # Frontend alias mapping: shipment `order_received`/`booked` → `received`
+    # Dispatch state for automated round-robin
+    class DispatchStatus(models.TextChoices):
+        IDLE = 'idle', 'Idle'
+        DISPATCHING = 'dispatching', 'Dispatching'
+        ASSIGNED = 'assigned', 'Assigned to Driver'
+        COMPLETED = 'completed', 'Completed'
+
+    # Frontend alias mapping: shipment `order_received`/`booked` → `received`, processing is Stage 0
     LEGACY_STATUS_MAP = {
         'order_received': Status.RECEIVED,
         'booked': Status.RECEIVED,
+        'processing': Status.PROCESSING,
+        'قيد التنفيذ': Status.PROCESSING,
+        'received_by_driver': Status.RECEIVED_BY_DRIVER,
     }
 
     order_number = models.CharField(
@@ -52,9 +64,33 @@ class Order(models.Model):
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.RECEIVED,
+        default=Status.PROCESSING,
         db_index=True,
     )
+
+    # Automated dispatch engine fields
+    dispatch_status = models.CharField(
+        max_length=20,
+        choices=DispatchStatus.choices,
+        default=DispatchStatus.IDLE,
+        db_index=True,
+        help_text='Round-robin dispatch state',
+    )
+    dispatch_queue = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Ordered list of driver IDs for round-robin',
+    )
+    dispatch_current_index = models.IntegerField(default=0)
+    dispatch_in_progress = models.BooleanField(default=False, db_index=True)
+    is_locked = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text='When True, Cancel is disabled globally (after driver Accept)',
+    )
+    # When received_by_driver, store accepted driver snapshot for visibility
+    assigned_driver_name = models.CharField(max_length=120, blank=True, default='')
+    assigned_driver_phone = models.CharField(max_length=20, blank=True, default='')
 
     # Core logistics fields — minimal for state machine, extensible
     origin = models.CharField(max_length=120, default='Rotterdam')
@@ -105,14 +141,16 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # State machine: allowed forward transitions + driver reject revert
+    # State machine: allowed forward transitions + driver reject revert + new dispatch flow
     ALLOWED_TRANSITIONS: dict[str, set[str]] = {
-        Status.RECEIVED: {Status.PICKED_UP, Status.CANCELLED},
+        Status.PROCESSING: {Status.RECEIVED, Status.CANCELLED, Status.RECEIVED_BY_DRIVER},
+        Status.RECEIVED: {Status.PICKED_UP, Status.CANCELLED, Status.RECEIVED_BY_DRIVER},
         Status.PICKED_UP: {Status.IN_TRANSIT, Status.RECEIVED},  # RECEIVED via driver reject (return to pool)
         Status.IN_TRANSIT: {Status.OUT_FOR_DELIVERY},
         Status.OUT_FOR_DELIVERY: {Status.DELIVERED},
         Status.DELIVERED: set(),
         Status.CANCELLED: set(),
+        Status.RECEIVED_BY_DRIVER: {Status.PICKED_UP, Status.IN_TRANSIT, Status.DELIVERED},
     }
 
     DELIVERY_ALLOWED: dict[str, set[str]] = {
@@ -129,7 +167,7 @@ class Order(models.Model):
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(status__in=[
-                    'received', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled'
+                    'processing', 'received', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled', 'received_by_driver'
                 ]),
                 name='order_status_valid',
                 violation_error_message='Invalid order status',
@@ -145,7 +183,9 @@ class Order(models.Model):
 
     @property
     def is_cancellable(self) -> bool:
-        return self.status == self.Status.RECEIVED
+        if self.is_locked:
+            return False
+        return self.status in (self.Status.PROCESSING, self.Status.RECEIVED)
 
     def can_transition(self, new_status: str) -> bool:
         # Normalize legacy aliases

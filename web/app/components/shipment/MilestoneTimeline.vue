@@ -27,7 +27,7 @@ defineProps<Props>()
         <div class="h-full bg-primary" :style="{ width: `${shipment.timelineFillPct}%` }" />
       </div>
 
-      <div class="relative z-10 grid grid-cols-5 gap-2 text-center">
+      <div class="relative z-10 grid grid-cols-6 gap-2 text-center">
         <div
           v-for="milestone in shipment.milestones"
           :key="milestone.label"

@@ -6,18 +6,22 @@ from .models import Order
 class OrderSerializer(serializers.ModelSerializer):
     owner_email = serializers.EmailField(source='owner.email', read_only=True)
     driver_email = serializers.EmailField(source='driver.email', read_only=True, allow_null=True)
+    driver_name = serializers.SerializerMethodField()
+    driver_phone = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = Order
         fields = [
             'id', 'order_number', 'owner', 'owner_email',
-            'driver', 'driver_email',
+            'driver', 'driver_email', 'driver_name', 'driver_phone',
             'status', 'status_display',
             'origin', 'origin_code', 'destination', 'destination_code',
             'mode', 'priority', 'gross_weight',
             'customer_phone', 'restaurant_name', 'restaurant_address',
             'delivery_status', 'delivery_updated_at',
+            'dispatch_status', 'dispatch_in_progress', 'is_locked',
+            'assigned_driver_name', 'assigned_driver_phone',
             'cancelled_at', 'cancelled_by', 'refund_status', 'refund_id', 'invoice_id', 'stripe_payment_intent_id',
             'created_at', 'updated_at',
         ]
@@ -25,8 +29,21 @@ class OrderSerializer(serializers.ModelSerializer):
             'id', 'owner', 'cancelled_at', 'cancelled_by',
             'refund_status', 'refund_id', 'invoice_id', 'stripe_payment_intent_id',
             'created_at', 'updated_at', 'status_display',
-            'owner_email', 'driver_email',
+            'owner_email', 'driver_email', 'driver_name', 'driver_phone',
+            'dispatch_status', 'dispatch_in_progress', 'is_locked',
+            'assigned_driver_name', 'assigned_driver_phone',
         ]
+
+    def get_driver_name(self, obj):
+        if obj.driver:
+            return obj.driver.get_full_name() or obj.driver.first_name or obj.assigned_driver_name or ''
+        return obj.assigned_driver_name or ''
+
+    def get_driver_phone(self, obj):
+        # Prefer driver profile phone, fallback to assigned snapshot
+        if obj.driver and hasattr(obj.driver, 'driver_profile') and getattr(obj.driver.driver_profile, 'phone', None):
+            return obj.driver.driver_profile.phone
+        return obj.assigned_driver_phone or obj.customer_phone or ''
 
     def validate_status(self, value):
         # Normalize legacy aliases
