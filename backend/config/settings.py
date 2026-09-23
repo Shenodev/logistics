@@ -79,13 +79,13 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
     'DJANGO_CORS_ALLOWED_ORIGINS',
-    'https://logistics.shenodev.tech,https://admin.logistics.shenodev.tech,http://localhost:3000',
+    'https://logistics.shenodev.tech,https://admin.logistics.shenodev.tech,https://delivery.logistics.shenodev.tech,http://localhost:3000',
 ).split(',')
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'DJANGO_CSRF_TRUSTED_ORIGINS',
-    'https://logistics.shenodev.tech,https://admin.logistics.shenodev.tech,http://localhost:3000',
+    'https://logistics.shenodev.tech,https://admin.logistics.shenodev.tech,https://delivery.logistics.shenodev.tech,http://localhost:3000',
 ).split(',')
 
 # Session cookie shared with the Nuxt frontend (httpOnly JWT in ``shenoflow_session``).
