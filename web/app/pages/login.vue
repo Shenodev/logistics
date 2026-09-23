@@ -43,6 +43,36 @@
       <Button type="submit" class="w-full" :disabled="auth.isPending">
         {{ auth.isPending ? 'Signing in…' : 'Sign in' }}
       </Button>
+
+      <!-- Demo auto-fill — portal-aware, one click to try -->
+      <div class="space-y-3 pt-1">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <span class="w-full border-t border-dashed border-border/60" />
+          </div>
+          <div class="relative flex justify-center text-[11px]">
+            <span class="bg-card px-2.5 text-muted-foreground tracking-widest uppercase">Try the demo</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="group flex w-full items-center gap-3 rounded-xl border border-dashed border-border/70 bg-muted/20 px-4 py-3 text-left transition hover:border-solid hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :aria-label="demoCreds.label"
+          @click="fillDemo"
+        >
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-background text-primary">
+            <MIcon :name="demoCreds.icon" class="text-[18px]" />
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-medium leading-none">{{ demoCreds.label }}</span>
+            <span class="block truncate text-xs text-muted-foreground">{{ demoCreds.sub }}</span>
+          </span>
+          <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition group-hover:translate-x-0.5">
+            <MIcon name="arrow_forward" class="text-[16px]" />
+          </span>
+        </button>
+      </div>
+
       <p v-if="portalMeta.devHint" class="text-center text-xs text-muted-foreground">
         Dev demo:
         <code class="text-cyan-300">{{ portalMeta.devHint }}</code>
@@ -85,7 +115,7 @@ const portalMeta = computed(() => {
         title: 'Sign in to Command Center',
         description: 'Dispatcher / Admin access',
         seoTitle: 'Dispatcher sign in',
-        devHint: 'admin@sheno.dev / admin123',
+        devHint: 'admin@shenodev.tech / admin123',
         showSignup: false,
         footerNote: 'Admin access is provisioned by Sheno fleet operations.',
       }
@@ -94,7 +124,7 @@ const portalMeta = computed(() => {
         title: 'Driver sign in',
         description: 'Driver access to the Sheno delivery network',
         seoTitle: 'Driver sign in',
-        devHint: '',
+        devHint: 'delivery@shenodev.tech / delivery123',
         showSignup: true,
         footerNote: '',
       }
@@ -103,7 +133,7 @@ const portalMeta = computed(() => {
         title: 'Sign in to ShenoFlow',
         description: 'Customer portal access',
         seoTitle: 'Sign in',
-        devHint: 'user@sheno.dev / user123',
+        devHint: 'user@shenodev.tech / user123',
         showSignup: false,
         footerNote: 'Portal access is provisioned by your shipper organization.',
       }
@@ -133,10 +163,21 @@ const loginSchema = toTypedSchema(
   }),
 )
 
-const { handleSubmit } = useForm({
+const { handleSubmit, setFieldValue } = useForm({
   validationSchema: loginSchema,
   initialValues: { email: '', password: '' },
 })
+
+const demoCreds = computed(() => {
+  if (portal === 'admin') return { email: 'admin@shenodev.tech', password: 'admin123', label: 'Login as Demo Admin', sub: 'admin@shenodev.tech · Command Center', icon: 'shield' }
+  if (portal === 'delivery') return { email: 'delivery@shenodev.tech', password: 'delivery123', label: 'Login as Demo Driver', sub: 'delivery@shenodev.tech · Delivery PWA', icon: 'local_shipping' }
+  return { email: 'user@shenodev.tech', password: 'user123', label: 'Login as Demo User', sub: 'user@shenodev.tech · Customer Portal', icon: 'inventory_2' }
+})
+
+function fillDemo() {
+  setFieldValue('email', demoCreds.value.email)
+  setFieldValue('password', demoCreds.value.password)
+}
 
 const onSubmit = handleSubmit(async ({ email, password }) => {
   try {
