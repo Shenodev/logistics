@@ -76,7 +76,37 @@ if ! "$PY" -c "import faker" 2>/dev/null; then
 fi
 
 info "Running migrations..."
-"$PY" "$BACKEND/manage.py" migrate --noinput
+if ! "$PY" "$BACKEND/manage.py" migrate --noinput; then
+  warn "migrate failed — checking for InconsistentMigrationHistory (admin before accounts)..."
+  BACKEND="$BACKEND" "$PY" << 'PYHEAL'
+import os, sys
+backend = os.environ.get("BACKEND", "backend")
+sys.path.insert(0, backend)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+import django
+django.setup()
+from django.db import connection
+try:
+    with connection.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM django_migrations WHERE app='admin' AND name='0001_initial'")
+        has_admin = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM django_migrations WHERE app='accounts' AND name='0001_initial'")
+        has_accounts = cur.fetchone()[0]
+        if has_admin and has_accounts:
+            cur.execute("SELECT applied FROM django_migrations WHERE app='accounts' AND name='0001_initial'")
+            acc_time = cur.fetchone()[0]
+            cur.execute("SELECT applied FROM django_migrations WHERE app='admin' AND name='0001_initial'")
+            adm_time = cur.fetchone()[0]
+            if adm_time < acc_time:
+                print(f"[heal] admin.0001 ({adm_time}) before accounts.0001 ({acc_time}) — deleting early admin rows")
+                cur.execute("DELETE FROM django_migrations WHERE app='admin' AND name IN ('0001_initial','0002_logentry_remove_auto_add','0003_logentry_add_action_flag_choices')")
+                print("[heal] deleted early admin migrations, will re-fake")
+except Exception as e:
+    print(f"[heal] check failed: {e}")
+PYHEAL
+  info "Retrying migrate --fake-initial..."
+  "$PY" "$BACKEND/manage.py" migrate --fake-initial --noinput || "$PY" "$BACKEND/manage.py" migrate --noinput
+fi
 ok "Migrations complete"
 
 if [[ "$NO_SEED" == "1" ]]; then

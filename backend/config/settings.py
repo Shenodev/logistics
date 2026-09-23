@@ -40,8 +40,12 @@ ALLOWED_HOSTS = os.environ.get(
 
 
 # Application definition
+# NOTE: 'accounts' MUST stay before 'django.contrib.admin' when AUTH_USER_MODEL='accounts.User'
+# else admin.0001 is recorded before accounts.0001 and check_consistent_history fails on Vercel
+# (django.db.migrations.exceptions.InconsistentMigrationHistory). Keep this order.
 
 INSTALLED_APPS = [
+    'accounts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,7 +54,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'accounts',
     'orders',
     'invoices',
     'fleet',
