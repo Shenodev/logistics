@@ -70,28 +70,34 @@ async function handleReject(id: string) {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- Driver header stats — large text for outdoor readability -->
-    <section class="rounded-xl border border-outline-variant bg-surface-container p-3">
-      <div class="flex items-center justify-between">
+  <div class="space-y-4 lg:space-y-6">
+    <!-- Driver header stats — readable outdoors, spacious on desktop -->
+    <section class="rounded-xl border border-outline-variant bg-surface-container p-3 lg:p-5">
+      <div class="flex items-center justify-between gap-3">
         <div>
-          <h1 class="font-heading text-headline-md font-bold leading-tight text-on-surface">Delivery Dashboard</h1>
-          <p class="text-body-sm text-on-surface-variant">Mobile • Large touch targets • Outdoor readable</p>
+          <h1 class="font-heading text-headline-md font-bold leading-tight text-on-surface lg:text-2xl">Delivery Dashboard</h1>
+          <p class="text-body-sm text-on-surface-variant lg:text-sm">Mobile • Large touch targets • Outdoor readable • Desktop optimized</p>
         </div>
-        <span class="rounded-full bg-primary px-2.5 py-1 text-label-sm font-bold text-on-primary">Driver</span>
+        <span class="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+          <MIcon name="bolt" class="text-[14px]" /> Live queue
+        </span>
+        <span class="rounded-full bg-primary px-2.5 py-1 text-label-sm font-bold text-on-primary lg:hidden">Driver</span>
       </div>
-      <div class="mt-3 grid grid-cols-3 gap-2">
-        <div class="rounded-lg bg-surface-low p-2 text-center">
-          <div class="font-telemetry-numeric text-lg font-bold text-primary">{{ driverStats.earningsToday }}</div>
+      <div class="mt-3 grid grid-cols-3 gap-2 lg:gap-3">
+        <div class="rounded-xl bg-surface-low p-3 text-center lg:p-4 lg:text-left">
           <div class="text-[11px] uppercase tracking-wider text-on-surface-variant">Today</div>
+          <div class="font-telemetry-numeric text-lg font-bold text-primary lg:text-2xl">{{ driverStats.earningsToday }}</div>
+          <div class="hidden lg:block text-xs text-on-surface-variant">Earnings</div>
         </div>
-        <div class="rounded-lg bg-surface-low p-2 text-center">
-          <div class="font-telemetry-numeric text-lg font-bold text-on-surface">{{ driverStats.deliveriesToday }}</div>
+        <div class="rounded-xl bg-surface-low p-3 text-center lg:p-4 lg:text-left">
           <div class="text-[11px] uppercase tracking-wider text-on-surface-variant">Deliveries</div>
+          <div class="font-telemetry-numeric text-lg font-bold text-on-surface lg:text-2xl">{{ driverStats.deliveriesToday }}</div>
+          <div class="hidden lg:block text-xs text-on-surface-variant">Completed today</div>
         </div>
-        <div class="rounded-lg bg-surface-low p-2 text-center">
-          <div class="font-telemetry-numeric text-lg font-bold text-tertiary">{{ driverStats.acceptanceRate }}</div>
+        <div class="rounded-xl bg-surface-low p-3 text-center lg:p-4 lg:text-left">
           <div class="text-[11px] uppercase tracking-wider text-on-surface-variant">Accept Rate</div>
+          <div class="font-telemetry-numeric text-lg font-bold text-tertiary lg:text-2xl">{{ driverStats.acceptanceRate }}</div>
+          <div class="hidden lg:block text-xs text-on-surface-variant">Pool acceptance</div>
         </div>
       </div>
     </section>

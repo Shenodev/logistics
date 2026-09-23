@@ -104,8 +104,9 @@ const isDelivered = computed(() => shipment.value?.deliveryStatus === 'delivered
         </div>
       </div>
 
-      <!-- Pickup — Restaurant -->
-      <section class="rounded-xl border border-outline-variant bg-surface-container p-3">
+      <!-- Pickup + Dropoff — grid on desktop -->
+      <div class="grid gap-4 lg:grid-cols-2">
+        <section class="rounded-xl border border-outline-variant bg-surface-container p-3 lg:p-4">
         <div class="flex items-center gap-2">
           <div class="flex size-9 items-center justify-center rounded-lg bg-tertiary-container/20 text-tertiary border border-tertiary/20">
             <MIcon name="restaurant" class="text-[20px]" />
@@ -137,7 +138,7 @@ const isDelivered = computed(() => shipment.value?.deliveryStatus === 'delivered
       </section>
 
       <!-- Dropoff — Customer -->
-      <section class="rounded-xl border border-primary/20 bg-surface-container p-3">
+      <section class="rounded-xl border border-primary/20 bg-surface-container p-3 lg:p-4">
         <div class="flex items-center gap-2">
           <div class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
             <MIcon name="person_pin_circle" class="text-[20px]" />
@@ -176,9 +177,10 @@ const isDelivered = computed(() => shipment.value?.deliveryStatus === 'delivered
         <p v-if="callToast" class="mt-2 text-center text-body-sm font-medium text-primary">Opening phone dialer…</p>
         <p class="mt-1 text-center text-label-sm text-on-surface-variant">Tap to call via device dialer — hands-free for driving</p>
       </section>
+      </div>
 
       <!-- Status update — large sequential buttons -->
-      <section class="rounded-xl border border-outline-variant bg-surface-container p-3">
+      <section class="rounded-xl border border-outline-variant bg-surface-container p-3 lg:p-5">
         <div class="flex items-center gap-2">
           <MIcon name="update" class="text-[20px] text-primary" />
           <h2 class="font-heading text-headline-sm font-semibold text-on-surface">Status Update</h2>

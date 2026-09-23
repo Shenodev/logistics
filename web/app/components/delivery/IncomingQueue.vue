@@ -30,11 +30,11 @@ const emit = defineEmits<{
       <p class="text-body-sm text-on-surface-variant">New assignments will appear here with haptic alert.</p>
     </div>
 
-    <div v-else class="space-y-3">
+    <div v-else class="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
       <article
         v-for="order in orders"
         :key="order.shipment.id"
-        class="rounded-xl border border-outline-variant bg-surface-container p-3 shadow-sm"
+        class="rounded-xl border border-outline-variant bg-surface-container p-3 shadow-sm lg:p-4"
       >
         <div class="flex items-start justify-between gap-2">
           <div class="flex items-center gap-2">
