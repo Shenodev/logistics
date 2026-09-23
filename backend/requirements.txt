@@ -13,3 +13,4 @@ stripe==12.5.1
 resend==2.13.0
 celery[redis]==5.4.0
 redis==5.2.1
+Faker==37.11.0
